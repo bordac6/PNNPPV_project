@@ -40,8 +40,8 @@ class HourglassNet(object):
             self.model.summary()
 
     def train(self, batch_size, model_path, epochs):
-        # dataset_path = os.path.join('D:\\', 'data', 'nyu_hand', 'train')
-        dataset_path = '/home/bordac6_uniba/nyu_jpg')
+        dataset_path = os.path.join('D:\\', 'nyu_croped')
+        # dataset_path = '/home/bordac6_uniba/nyu_jpg')
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)
