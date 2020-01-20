@@ -148,11 +148,13 @@ def transform_kp(joints, center, scale, res, rot):
 
 def generate_gtmap(joints, sigma, inres, outres):
     npart = joints.shape[0]
-    hmap = np.zeros(shape=(inres[0], inres[1], npart), dtype=float)
+    hmap = np.zeros(shape=(480, 640, npart), dtype=float)
+    tmp = np.zeros(shape=(256, 341, npart), dtype=float)
     gtmap = np.zeros(shape=(outres[0], outres[1], npart), dtype=float)
     for i in range(npart):
         visibility = joints[i, 2]
         if visibility > 0:
             hmap[:, :, i] = draw_labelmap(hmap[:, :, i], joints[i, :], sigma)
-            gtmap[:, :, i] = cv2.resize(hmap[:,:,i], dsize=(outres[1], outres[0]), interpolation=cv2.INTER_CUBIC)
+            tmp[:, :, i] = cv2.resize(hmap[:,:,i], dsize=(341, 256), interpolation=cv2.INTER_CUBIC)
+            gtmap[:, :, i] = cv2.resize(tmp[:,:256,i], dsize=(outres[1], outres[0]), interpolation=cv2.INTER_CUBIC)
     return gtmap
