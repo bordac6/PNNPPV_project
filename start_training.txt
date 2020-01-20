@@ -1,0 +1,1 @@
+python train.py --gpuID 0 --epochs 1 --batch_size 24 --num_stack 1 --model_path ../../trained_models/hg_nyu_001
