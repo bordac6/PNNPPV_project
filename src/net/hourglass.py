@@ -16,6 +16,7 @@ import scipy.misc
 from data_process import normalize
 import numpy as np
 from eval_callback import EvalCallBack
+import imageio
 
 
 class HourglassNet(object):
@@ -40,7 +41,7 @@ class HourglassNet(object):
 
     def train(self, batch_size, model_path, epochs):
         # dataset_path = os.path.join('D:\\', 'data', 'nyu_hand', 'train')
-        dataset_path = os.path.join('D:\\', 'nyu_jpg')
+        dataset_path = '/home/bordac6_uniba/nyu_jpg')
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)
@@ -100,6 +101,6 @@ class HourglassNet(object):
         return out[-1], scale
 
     def inference_file(self, imgfile, mean=None):
-        imgdata = scipy.misc.imread(imgfile)
+        imgdata = imageio.imread(imgfile)
         ret = self.inference_rgb(imgdata, imgdata.shape, mean)
         return ret

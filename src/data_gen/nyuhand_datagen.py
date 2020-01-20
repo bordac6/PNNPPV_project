@@ -7,6 +7,7 @@ import data_process
 import random
 from scipy.io import loadmat
 import cv2
+import imageio
 
 class NYUHandDataGen(object):
 
@@ -89,7 +90,7 @@ class NYUHandDataGen(object):
 
     def process_image(self, sample_index, kpanno, sigma, rot_flag, scale_flag, flip_flag):
         imagefile = 'rgb_1_'+ str(sample_index+1).zfill(7) +'.jpg'
-        image = scipy.misc.imread(os.path.join(self.imgpath, imagefile))
+        image = imageio.imread(os.path.join(self.imgpath, imagefile))
 
         norm_image = data_process.normalize(image, self.get_color_mean(image))
 
