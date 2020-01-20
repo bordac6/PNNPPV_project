@@ -2,7 +2,7 @@ import keras
 import os
 import datetime
 from time import time
-from mpii_datagen import MPIIDataGen
+from nyuhand_datagen import NYUHandDataGen
 from eval_heatmap import cal_heatmap_acc
 
 
@@ -17,9 +17,8 @@ class EvalCallBack(keras.callbacks.Callback):
         return self.foldpath
 
     def run_eval(self, epoch):
-        valdata = MPIIDataGen("../../data/mpii/mpii_annotations.json",
-                              "../../data/mpii/images",
-                              inres=self.inres, outres=self.outres, is_train=False)
+        dataset_path = os.path.join('D:\\', 'nyu_croped')
+        valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False)
 
         total_suc, total_fail = 0, 0
         threshold = 0.5

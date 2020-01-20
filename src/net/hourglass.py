@@ -40,8 +40,8 @@ class HourglassNet(object):
             self.model.summary()
 
     def train(self, batch_size, model_path, epochs):
-        dataset_path = os.path.join('D:\\', 'nyu_croped')
-        # dataset_path = '/home/bordac6_uniba/nyu_jpg')
+        # dataset_path = os.path.join('D:\\', 'nyu_croped')
+        dataset_path = '/home/bordac6_uniba/nyu_croped')
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)
@@ -57,28 +57,29 @@ class HourglassNet(object):
         self.model.fit_generator(generator=train_gen, steps_per_epoch=train_dataset.get_dataset_size() // batch_size,
                                  epochs=epochs, callbacks=xcallbacks)
 
-    # def resume_train(self, batch_size, model_json, model_weights, init_epoch, epochs):
+    def resume_train(self, batch_size, model_json, model_weights, init_epoch, epochs):
 
-    #     self.load_model(model_json, model_weights)
-    #     self.model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
+        self.load_model(model_json, model_weights)
+        self.model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
-    #     train_dataset = MPIIDataGen("../../data/mpii/mpii_annotations.json", "../../data/mpii/images",
-    #                                 inres=self.inres, outres=self.outres, is_train=True)
+        # dataset_path = os.path.join('D:\\', 'nyu_croped')
+        dataset_path = '/home/bordac6_uniba/nyu_croped')
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
 
-    #     train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=1, is_shuffle=True,
-    #                                         rot_flag=True, scale_flag=True, flip_flag=True)
+        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=1, is_shuffle=True,
+                                            rot_flag=True, scale_flag=True, flip_flag=True)
 
-    #     model_dir = os.path.dirname(os.path.abspath(model_json))
-    #     print(model_dir, model_json)
-    #     csvlogger = CSVLogger(
-    #         os.path.join(model_dir, "csv_train_" + str(datetime.datetime.now().strftime('%H:%M')) + ".csv"))
+        model_dir = os.path.dirname(os.path.abspath(model_json))
+        print(model_dir, model_json)
+        csvlogger = CSVLogger(
+            os.path.join(model_dir, "csv_train_" + str(datetime.datetime.now().strftime('%H:%M')) + ".csv"))
 
-    #     checkpoint = EvalCallBack(model_dir, self.inres, self.outres)
+        checkpoint = EvalCallBack(model_dir, self.inres, self.outres)
 
-    #     xcallbacks = [csvlogger, checkpoint]
+        xcallbacks = [csvlogger, checkpoint]
 
-    #     self.model.fit_generator(generator=train_gen, steps_per_epoch=train_dataset.get_dataset_size() // batch_size,
-    #                              initial_epoch=init_epoch, epochs=epochs, callbacks=xcallbacks)
+        self.model.fit_generator(generator=train_gen, steps_per_epoch=train_dataset.get_dataset_size() // batch_size,
+                                 initial_epoch=init_epoch, epochs=epochs, callbacks=xcallbacks)
 
     def load_model(self, modeljson, modelfile):
         with open(modeljson) as f:
