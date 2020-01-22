@@ -41,7 +41,7 @@ class HourglassNet(object):
 
     def train(self, batch_size, model_path, epochs):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
-        dataset_path = '/home/bordac6_uniba/nyu_croped'
+        dataset_path = '/home/tomas_bordac/nyu_croped'
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)
@@ -63,7 +63,7 @@ class HourglassNet(object):
         self.model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
-        dataset_path = '/home/bordac6_uniba/nyu_croped'
+        dataset_path = '/home/tomas_bordac/nyu_croped'
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
 
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=1, is_shuffle=True,
