@@ -104,11 +104,13 @@ class NYUHandDataGen(object):
 
     @classmethod
     def get_kp_keys(cls):
-        keys = ['r_ankle', 'r_knee', 'r_hip',
-                'l_hip', 'l_knee', 'l_ankle',
-                'plevis', 'thorax', 'upper_neck', 'head_top',
-                'r_wrist', 'r_elbow', 'r_shoulder',
-                'l_shoulder', 'l_elbow', 'l_wrist']
+        keys = ['pinky_fingertip', 'pinky',
+                'ring_fingertip', 'ring',
+                'middle_fingertip', 'middle',
+                'index_fingertip', 'index',
+                'thumb_fingertip', 'thumb',
+                'wrist'
+                ]
         return keys
 
     def flip(self, image, joints, center):

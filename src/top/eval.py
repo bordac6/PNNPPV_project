@@ -8,6 +8,7 @@ import os
 import numpy as np
 import scipy.misc
 from mpii_datagen import MPIIDataGen
+from nyuhand_datagen import NYUHandDataGen
 from eval_heatmap import get_predicted_kp_from_htmap
 from hourglass import HourglassNet
 import argparse
@@ -33,12 +34,13 @@ def main_eval(model_json, model_weights, num_stack, num_class, matfile, tiny):
 
     xnet.load_model(model_json, model_weights)
 
-    valdata = MPIIDataGen("../../data/mpii/mpii_annotations.json", "../../data/mpii/images",
-                          inres=inres, outres=outres, is_train=False)
+    # dataset_path = '/home/tomas_bordac/nyu_croped'
+    dataset_path = os.path.join('D:\\', 'nyu_croped')
+    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=inres, outres=outres, is_train=False)
 
-    print 'val data size', valdata.get_dataset_size()
+    print('val data size', valdata.get_dataset_size())
 
-    valkps = np.zeros(shape=(valdata.get_dataset_size(), 16, 2), dtype=np.float)
+    valkps = np.zeros(shape=(valdata.get_dataset_size(), 11, 2), dtype=np.float)
 
     count = 0
     batch_size = 8
