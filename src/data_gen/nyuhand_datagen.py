@@ -95,7 +95,7 @@ class NYUHandDataGen(object):
         norm_image = data_process.normalize(image, self.get_color_mean(image))
 
         # create heatmaps
-        heatmaps = data_process.generate_gtmap(kpanno, sigma, self.inres, self.outres)
+        heatmaps = data_process.generate_gtmap(kpanno, sigma, self.outres)
 
         # meta info
         metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile}
