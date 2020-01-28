@@ -146,7 +146,7 @@ def transform_kp(joints, center, scale, res, rot):
     return newjoints
 
 
-def generate_gtmap(joints, sigma, inres, outres):
+def generate_gtmap(joints, sigma, outres):
     npart = joints.shape[0]
     hmap = np.zeros(shape=(480, 640, npart), dtype=float)
     gtmap = np.zeros(shape=(outres[0], outres[1], npart), dtype=float)
