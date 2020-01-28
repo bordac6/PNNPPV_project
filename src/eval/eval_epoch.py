@@ -6,6 +6,8 @@ sys.path.insert(0, "../data_gen/")
 from nyuhand_datagen import NYUHandDataGen
 from heatmap_process import post_process_heatmap
 from keras.models import load_model, model_from_json
+from keras.optimizers import Adam, RMSprop
+from keras.losses import mean_squared_error
 
 def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
     print('pre_kp: {}'.format(pre_kp))
@@ -60,7 +62,7 @@ def run_eval(model_json, model_weights, epoch):
     model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
     dataset_path = '/home/tomas_bordac/nyu_croped'
-    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False)
+    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=(256, 256), outres=(64, 64), is_train=False)
 
     total_suc, total_fail = 0, 0
     threshold = 0.5
@@ -81,7 +83,7 @@ def run_eval(model_json, model_weights, epoch):
         total_fail += bad
 
         print('success: {}'.format(suc))
-        print('fail: {}'.format(fail))
+        print('bad: {}'.format(bad))
         input()
 
     acc = total_suc * 1.0 / (total_fail + total_suc)
