@@ -89,7 +89,7 @@ def run_eval(model_json, model_weights, epoch):
     with open(os.path.join('./', 'val.txt'), 'a+') as xfile:
         xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + '\n')
 
-if if __name__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--resume_model", help="start point to retrain")
     parser.add_argument("--resume_model_json", help="model json")
