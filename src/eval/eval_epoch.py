@@ -52,7 +52,8 @@ def cal_heatmap_acc(prehmap, metainfo, threshold):
 def load_model(modeljson, modelfile):
     with open(modeljson) as f:
         model = model_from_json(f.read())
-    return model.load_weights(modelfile)
+    model.load_weights(modelfile)
+    return model
 
 def run_eval(model_json, model_weights, epoch):
     model = load_model(model_json, model_weights)
