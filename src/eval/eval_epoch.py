@@ -95,4 +95,6 @@ if __name__ == "__main__":
     parser.add_argument("--resume_model", help="start point to retrain")
     parser.add_argument("--resume_model_json", help="model json")
 
-    run_eval(resume_model_json, resume_model, 1)
+    args = parser.parse_args()
+
+    run_eval(args.resume_model_json, args.resume_model, 1)
