@@ -11,12 +11,13 @@ import imageio
 
 class NYUHandDataGen(object):
 
-    def __init__(self, matfile, imgpath, inres, outres, is_train):
+    def __init__(self, matfile, imgpath, inres, outres, is_train, is_pretrain):
         self.matfile = matfile
         self.imgpath = imgpath
         self.inres = inres
         self.outres = outres
         self.is_train = is_train
+        self.is_pretrain = is_pretrain
         self.nparts = 11
         self.anno, self.anno_idx = self._load_image_annotation()
 
@@ -40,23 +41,26 @@ class NYUHandDataGen(object):
             # else:
             #     val_anno.append(annot[0, i, hand_points, :])
 
-        if self.is_train:
+        if self.is_train and self.is_pretrain:
+            train_annot_idx = annot_idx[:train_val_treshold]
+            return _anno, shuffle(train_annot_idx)[:32]
+        elif self.is_train:
             return _anno, annot_idx[:train_val_treshold]
         else:
             return _anno, annot_idx[train_val_treshold:]
 
     def get_dataset_size(self):
-        return len(self.anno)
+        return len(self.anno_idx)
 
     def get_color_mean(self):
         mean = np.array([0.404, 0.404, 0.404])
         return mean
 
     def get_annotations(self):
-        return self.anno
+        return self.anno[self.anno_idx]
 
     def generator(self, batch_size, num_hgstack, sigma=3, with_meta=False, is_shuffle=False,
-                  rot_flag=False, scale_flag=False, flip_flag=False, pretrain=False):
+                  rot_flag=False, scale_flag=False, flip_flag=False):
         '''
         Input:  batch_size * inres  * Channel (3)
         Output: batch_size * oures  * nparts
@@ -64,9 +68,6 @@ class NYUHandDataGen(object):
         train_input = np.zeros(shape=(batch_size, self.inres[0], self.inres[1], 3), dtype=np.float)
         gt_heatmap = np.zeros(shape=(batch_size, self.outres[0], self.outres[1], self.nparts), dtype=np.float)
         meta_info = list()
-        train_idx = self.anno_idx
-        if pretrain:
-            train_idx = self.anno_idx[:batch_size*10]
 
         if not self.is_train:
             assert (is_shuffle == False), 'shuffle must be off in val model'
@@ -74,7 +75,7 @@ class NYUHandDataGen(object):
 
         while True:
             if is_shuffle:
-                shuffle(train_idx)
+                shuffle(self.anno_idx)
 
             for i, kpanno_idx in enumerate(train_idx):
                 kpanno = self.anno[kpanno_idx]
@@ -104,7 +105,7 @@ class NYUHandDataGen(object):
         norm_image = image / 255.0
 
         # create heatmaps
-        heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, 3, self.outres)
+        heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, sigma, self.outres)
 
         if self.debug:
             orig_image = cv2.resize(image, dsize=(480, 480), interpolation=cv2.INTER_CUBIC) / 255.0

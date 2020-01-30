@@ -52,5 +52,5 @@ if __name__ == "__main__":
                           model_weights=args.resume_model,
                           init_epoch=args.init_epoch, epochs=args.epochs)
     else:
-        xnet.build_model(mobile=args.mobile, show=True)
+        xnet.build_model(mobile=args.mobile, show=False)
         xnet.train(epochs=args.epochs, model_path=args.model_path, batch_size=args.batch_size)

@@ -43,9 +43,9 @@ class HourglassNet(object):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         dataset_path = '../../data/nyu_croped/'
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_pretrain=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
-                                            rot_flag=True, scale_flag=True, flip_flag=True, pretrain=True)
+                                            rot_flag=True, scale_flag=True, flip_flag=True)
 
         csvlogger = CSVLogger(
             os.path.join(model_path, "csv_train_" + str(datetime.datetime.now().strftime('%H:%M')) + ".csv"))
@@ -65,7 +65,7 @@ class HourglassNet(object):
 
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         dataset_path = '/home/tomas_bordac/nyu_croped'
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_pretrain=True)
 
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)

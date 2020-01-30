@@ -45,43 +45,51 @@ def draw_labelmap(img, pt, sigma, type='Gaussian'):
 
 ##########################################
 
-from shutil import copy
+# from shutil import copy
 
-dst = os.path.join('D:\\nyu_reduced\\')
-dataset_path = os.path.join('D:\\', 'data', 'nyu_hand', 'train')
-img_idx = 72756
-for i in range(img_idx):
-    img_number = str(i+1).zfill(7)
-    src = os.path.join(dataset_path, 'rgb_1_'+ img_number +'.png')
-    copy(src, dst)
+dataset_path = os.path.join('..\\data\\nyu_croped')
+# dataset_path = os.path.join('D:\\', 'data', 'nyu_hand', 'train')
+# img_idx = 72756
+# for i in range(img_idx):
+#     img_number = str(i+1).zfill(7)
+#     src = os.path.join(dataset_path, 'rgb_1_'+ img_number +'.png')
+#     copy(src, dst)
 
-# hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+# img_number = str(1+1).zfill(7)
+# image_path = os.path.join(dataset_path, 'rgb_1_'+ img_number +'.jpg')
+# image = scipy.misc.imread(image_path)
 
-# annot = loadmat(os.path.join(dataset_path, 'joint_data.mat'))
+hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+
+annot = loadmat(os.path.join(dataset_path, 'joint_data.mat'))
 
 # print(annot['joint_uvd'].shape)
 
-# joint_names = annot['joint_names']
-# joint_xyz =annot['joint_xyz']
-# joint_uvd = annot['joint_uvd'][0,img_idx, :, :]
+joint_names = annot['joint_names']
+joint_xyz =annot['joint_xyz']
+joint_uvd = annot['joint_uvd'][0,0, :, :]
 
-# fig, ax = plt.subplots(1)
-# ax.imshow(image)
-# for i in hand_points:
-#     x = joint_uvd[i, 0]
-#     y = joint_uvd[i, 1]
-#     ax.add_patch( Circle((x, y), 5, color='r') )
+# for i in range(0, 10000, 1000):
+#     img_number = str(i+1).zfill(7)
+#     image_path = os.path.join(dataset_path, 'rgb_1_'+ img_number +'.jpg')
+#     image = scipy.misc.imread(image_path)
+#     fig, ax = plt.subplots(1)
+#     ax.imshow(image)
+#     for i in hand_points:
+#         x = joint_uvd[i, 0] //1.785
+#         y = joint_uvd[i, 1] // 1.785
+#         ax.add_patch( Circle((x, y), 5, color='r') )
 
-# plt.show()
+#     plt.show()
 
-# heat_map = np.zeros(shape=(image.shape[0], image.shape[1], len(hand_points)))
-# hm = np.zeros(shape=(120, 160, len(hand_points)))
+heat_map = np.zeros(shape=(image.shape[0], image.shape[1], len(hand_points)))
+hm = np.zeros(shape=(120, 160, len(hand_points)))
 
-# for i in range(len(hand_points)):
-#     visibility = joint_uvd[i, 2]
-#     if visibility > 0:
-#         heat_map[:,:,i] = draw_labelmap(heat_map[:,:,i], joint_uvd[i], 5)
-#         hm[:,:,i] = cv2.resize(heat_map[:,:,i], dsize=(160, 120), interpolation=cv2.INTER_CUBIC)
+for i in range(len(hand_points)):
+    visibility = joint_uvd[i, 2]
+    if visibility > 0:
+        heat_map[:,:,i] = draw_labelmap(heat_map[:,:,i], joint_uvd[i], 5)
+        hm[:,:,i] = cv2.resize(heat_map[:,:,i], dsize=(160, 120), interpolation=cv2.INTER_CUBIC)
 
-# plt.imshow(hm[:,:,5])
-# plt.show()
+plt.imshow(hm[:,:,5])
+plt.show()
