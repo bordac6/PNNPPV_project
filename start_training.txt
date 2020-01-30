@@ -1,1 +1,11 @@
-python train.py --gpuID 0 --epochs 1 --batch_size 24 --num_stack 1 --model_path ../../trained_models/hg_nyu_001
+# start training
+python3 train.py --gpuID 0 --epochs 100 --batch_size 24 --num_stack 2 --model_path ../../trained_models/hg_nyu_002
+
+#resume training
+python3 train.py --gpuID 0 --epochs 100 --batch_size 24 --num_stack 2 --model_path ../../trained_models/hg_nyu_002  --resume True --resume_model_json ../../trained_models/hg_nyu_002/net_arch.json --resume_model ../../trained_models/hg_nyu_002/weights_epoch0.h5 --init_epoch 1
+
+# demo
+python demo.py --gpuID 0 --model_json ../../trained_models/hg_nyu_001/net_arch.json  --model_weights ../../trained_models/hg_nyu_001/weights_epoch43.h5  --conf_threshold 0.1 --input_image ../../images/s.jpg
+
+# eval model
+python eval.py --gpuID 0 --model_weights ../../trained_models/hg_nyu_001/weights_epoch86.h5  --model_json ../../trained_models/hg_nyu_001/net_arch.json --mat_file ../../trained_models/hg_nyu_001/preds.mat --num_stack 2
