@@ -1,6 +1,7 @@
 import sys
 import argparse
 import numpy as np
+import cv2
 
 sys.path.insert(0, "../data_gen/")
 from nyuhand_datagen import NYUHandDataGen
@@ -9,10 +10,9 @@ from keras.models import load_model, model_from_json
 from keras.optimizers import Adam, RMSprop
 from keras.losses import mean_squared_error
 
-def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
-    print('pre_kp: {}'.format(pre_kp))
-    print('gt_kp: {}'.format(gt_kp))
+show_outputs = False
 
+def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
     if gt_kp[0] > 1 and gt_kp[1] > 1:
         dif = np.linalg.norm(gt_kp[0:2] - pre_kp[0:2]) / norm
         if dif < threshold:
@@ -61,7 +61,8 @@ def run_eval(model_json, model_weights, epoch):
     model = load_model(model_json, model_weights)
     model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
-    dataset_path = '/home/tomas_bordac/nyu_croped'
+    # dataset_path = '/home/tomas_bordac/nyu_croped'
+    dataset_path = '..\\..\\data\\nyu_croped'
     valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=(256, 256), outres=(64, 64), is_train=False)
 
     total_suc, total_fail = 0, 0
@@ -69,13 +70,41 @@ def run_eval(model_json, model_weights, epoch):
 
     count = 0
     batch_size = 8
-    for _img, _gthmap, _meta in valdata.generator(batch_size, 2, sigma=1, is_shuffle=False, with_meta=True):
+    for _img, _gthmap, _meta in valdata.generator(batch_size, 2, sigma=3, is_shuffle=False, with_meta=True):
 
         count += batch_size
         if count > valdata.get_dataset_size():
             break
 
         out = model.predict(_img)
+        pred_map_batch = out[-1]
+
+        if not show_outputs:
+            for i in range(batch_size):
+                orig_image = cv2.resize(_img[i], dsize=(480, 480), interpolation=cv2.INTER_CUBIC)
+                kpanno = _meta[i]['tpts']
+                pred_heatmaps = pred_map_batch[i]
+
+                pred_kps = post_process_heatmap(pred_heatmaps)
+                pred_kps = np.array(pred_kps)
+
+                for j in range(kpanno.shape[0]):
+                    x = kpanno[j, 0]
+                    y = kpanno[j, 1]
+                    orig_image = cv2.circle(orig_image, (int(x), int(y)), 5, (0,0,255), 2)
+
+                for j in range(pred_kps.shape[0]):
+                    x = pred_kps[j, 0] * 4
+                    y = pred_kps[j, 1] * 4
+                    _img[i] = cv2.circle(_img[i], (int(x), int(y)), 5, (0,0,255), 2)
+
+                cv2.imshow('orig with heatmaps', orig_image)
+                cv2.imshow('gt heatmap', np.sum(_gthmap[-1][i], axis=-1))
+
+                cv2.imshow('pred with heatmaps', _img[i])
+                cv2.imshow('pred heatmap', cv2.resize(np.sum(pred_heatmaps, axis=-1), dsize=(256, 256), interpolation=cv2.INTER_CUBIC))
+                
+                cv2.waitKey(0) # FIXME
 
         suc, bad = cal_heatmap_acc(out[-1], _meta, threshold)
 
@@ -94,10 +123,11 @@ def run_eval(model_json, model_weights, epoch):
         xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + '\n')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--resume_model", help="start point to retrain")
-    parser.add_argument("--resume_model_json", help="model json")
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--resume_model", help="start point to retrain")
+    # parser.add_argument("--resume_model_json", help="model json")
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    run_eval(args.resume_model_json, args.resume_model, 1)
+    # run_eval(args.resume_model_json, args.resume_model, 1)
+    run_eval('..\\..\\trained_models\\hg_nyu_001\\net_arch.json', '..\\..\\trained_models\\hg_nyu_001\\weights_epoch86.h5', 1)

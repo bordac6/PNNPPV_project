@@ -18,40 +18,45 @@ class NYUHandDataGen(object):
         self.outres = outres
         self.is_train = is_train
         self.nparts = 11
-        self.anno = self._load_image_annotation()
+        self.anno, self.anno_idx = self._load_image_annotation()
+
+        self.debug = False
 
     def _load_image_annotation(self):
         # load train or val annotation
         annot_data = loadmat(os.path.join(self.imgpath, self.matfile))
         annot = annot_data['joint_uvd']
         nsamples = annot.shape[1]
-        train_val_treshold = nsamples * 0.8
+        train_val_treshold = int(np.ceil(nsamples * 0.8))
         hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        annot_idx = np.arange(nsamples)
 
-        val_anno, train_anno = [], []
+        # val_anno, train_anno = [], []
+        _anno = []
         for i in range(nsamples):
-            if  i < train_val_treshold:
-                train_anno.append(annot[0, i, hand_points, :])
-            else:
-                val_anno.append(annot[0, i, hand_points, :])
+            _anno.append(annot[0, i, hand_points, :])
+            # if  i < train_val_treshold:
+                # train_anno.append(annot[0, i, hand_points, :])
+            # else:
+            #     val_anno.append(annot[0, i, hand_points, :])
 
         if self.is_train:
-            return train_anno
+            return _anno, annot_idx[:train_val_treshold]
         else:
-            return val_anno
+            return _anno, annot_idx[train_val_treshold:]
 
     def get_dataset_size(self):
         return len(self.anno)
 
-    def get_color_mean(self, image):
-        mean = np.array([np.mean(image[:,:,0]), np.mean(image[:,:,1]), np.mean(image[:,:,2])], dtype=np.float)
+    def get_color_mean(self):
+        mean = np.array([0.404, 0.404, 0.404])
         return mean
 
     def get_annotations(self):
         return self.anno
 
-    def generator(self, batch_size, num_hgstack, sigma=1, with_meta=False, is_shuffle=False,
-                  rot_flag=False, scale_flag=False, flip_flag=False):
+    def generator(self, batch_size, num_hgstack, sigma=3, with_meta=False, is_shuffle=False,
+                  rot_flag=False, scale_flag=False, flip_flag=False, pretrain=False):
         '''
         Input:  batch_size * inres  * Channel (3)
         Output: batch_size * oures  * nparts
@@ -59,6 +64,9 @@ class NYUHandDataGen(object):
         train_input = np.zeros(shape=(batch_size, self.inres[0], self.inres[1], 3), dtype=np.float)
         gt_heatmap = np.zeros(shape=(batch_size, self.outres[0], self.outres[1], self.nparts), dtype=np.float)
         meta_info = list()
+        train_idx = self.anno_idx
+        if pretrain:
+            train_idx = self.anno_idx[:batch_size*10]
 
         if not self.is_train:
             assert (is_shuffle == False), 'shuffle must be off in val model'
@@ -66,11 +74,11 @@ class NYUHandDataGen(object):
 
         while True:
             if is_shuffle:
-                shuffle(self.anno)
+                shuffle(train_idx)
 
-            for i, kpanno in enumerate(self.anno):
-
-                _imageaug, _gthtmap, _meta = self.process_image(i, kpanno, sigma, rot_flag, scale_flag, flip_flag)
+            for i, kpanno_idx in enumerate(train_idx):
+                kpanno = self.anno[kpanno_idx]
+                _imageaug, _gthtmap, _meta = self.process_image(kpanno_idx, kpanno, sigma, rot_flag, scale_flag, flip_flag)
                 _index = i % batch_size
 
                 train_input[_index, :, :, :] = _imageaug
@@ -91,11 +99,27 @@ class NYUHandDataGen(object):
     def process_image(self, sample_index, kpanno, sigma, rot_flag, scale_flag, flip_flag):
         imagefile = 'rgb_1_'+ str(sample_index+1).zfill(7) +'.jpg'
         image = imageio.imread(os.path.join(self.imgpath, imagefile))
-
-        norm_image = data_process.normalize(image, self.get_color_mean(image))
+    
+        # norm_image = data_process.normalize(image, self.get_color_mean(image)) #UNNECESSARY
+        norm_image = image / 255.0
 
         # create heatmaps
-        heatmaps = data_process.generate_gtmap(kpanno, sigma, self.outres)
+        heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, 3, self.outres)
+
+        if self.debug:
+            orig_image = cv2.resize(image, dsize=(480, 480), interpolation=cv2.INTER_CUBIC) / 255.0
+            im = np.concatenate([orig_image, np.sum(orig_size_map, axis=-1)[:,:,np.newaxis]], axis=-1)
+            
+            for i in range(kpanno.shape[0]):
+                x = kpanno[i, 0]
+                y = kpanno[i, 1]
+                orig_image = cv2.circle(orig_image, (int(x), int(y)), 5, (0,0,255), 2)
+
+            cv2.imshow('orig with heatmaps GENERATOR', orig_image)
+            cv2.imshow('orig heatmap GENERATOR', np.sum(orig_size_map, axis=-1))
+            cv2.imshow('gt heatmap GENERATOR', np.sum(heatmaps, axis=-1))
+            
+            cv2.waitKey(0) # FIXME
 
         # meta info
         metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile}

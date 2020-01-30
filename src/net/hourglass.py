@@ -41,11 +41,12 @@ class HourglassNet(object):
 
     def train(self, batch_size, model_path, epochs):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
-        dataset_path = '/home/tomas_bordac/nyu_croped'
+        # dataset_path = '/home/tomas_bordac/nyu_croped'
+        dataset_path = '../../data/nyu_croped/'
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
-        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=1, is_shuffle=True,
-                                            rot_flag=True, scale_flag=True, flip_flag=True)
-        
+        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
+                                            rot_flag=True, scale_flag=True, flip_flag=True, pretrain=True)
+
         csvlogger = CSVLogger(
             os.path.join(model_path, "csv_train_" + str(datetime.datetime.now().strftime('%H:%M')) + ".csv"))
         modelfile = os.path.join(model_path, 'weights_{epoch:02d}_{loss:.2f}.hdf5')
@@ -66,7 +67,7 @@ class HourglassNet(object):
         dataset_path = '/home/tomas_bordac/nyu_croped'
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True)
 
-        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=1, is_shuffle=True,
+        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)
 
         model_dir = os.path.dirname(os.path.abspath(model_json))
@@ -92,8 +93,7 @@ class HourglassNet(object):
         imgdata = scipy.misc.imresize(rgbdata, self.inres)
 
         if mean is None:
-            # mean = np.array([0.4404, 0.4440, 0.4327], dtype=np.float)
-            mean = np.array([np.mean(imgdata[:,:,0]), np.mean(imgdata[:,:,1]), np.mean(imgdata[:,:,2])], dtype=np.float)
+            mean = np.array([0.4404, 0.4440, 0.4327], dtype=np.float)
 
         imgdata = normalize(imgdata, mean)
 

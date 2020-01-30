@@ -97,8 +97,9 @@ def normalize(imgdata, color_mean):
     '''
     imgdata = imgdata / 255.0
 
-    for i in range(imgdata.shape[-1]):
-        imgdata[:, :, i] -= color_mean[i]
+    # UNNECESSARY
+    # for i in range(imgdata.shape[-1]):
+    #     imgdata[:, :, i] -= color_mean[i]
 
     return imgdata
 
@@ -150,9 +151,12 @@ def generate_gtmap(joints, sigma, outres):
     npart = joints.shape[0]
     hmap = np.zeros(shape=(480, 640, npart), dtype=float)
     gtmap = np.zeros(shape=(outres[0], outres[1], npart), dtype=float)
+
     for i in range(npart):
         visibility = joints[i, 2]
         if visibility > 0:
             hmap[:, :, i] = draw_labelmap(hmap[:, :, i], joints[i, :], sigma)
             gtmap[:, :, i] = cv2.resize(hmap[:,:480, i], dsize=(outres[1], outres[0]), interpolation=cv2.INTER_CUBIC)
-    return gtmap
+    
+    # return gtmap
+    return gtmap, hmap[:,:480,:]
