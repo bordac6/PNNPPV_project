@@ -11,7 +11,8 @@ def get_predicted_kp_from_htmap(heatmap, meta, outres):
 
     # use meta information to transform back to original image
     mkps = copy.copy(kps)
-    # for i in range(kps.shape[0]):
+    for i in range(kps.shape[0]):
+        mkps[i, 0:2] *= 7.5 
     #     mkps[i, 0:2] = data_process.transform(kps[i], meta['center'], meta['scale'], res=outres, invert=1, rot=0)
 
     return mkps

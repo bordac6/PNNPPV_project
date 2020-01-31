@@ -2,6 +2,7 @@ import sys
 import argparse
 import numpy as np
 import cv2
+import os
 
 sys.path.insert(0, "../data_gen/")
 from nyuhand_datagen import NYUHandDataGen
@@ -62,8 +63,9 @@ def run_eval(model_json, model_weights, epoch):
     model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
     # dataset_path = '/home/tomas_bordac/nyu_croped'
-    dataset_path = '..\\..\\data\\nyu_croped'
-    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=(256, 256), outres=(64, 64), is_train=False)
+    # dataset_path = '..\\..\\data\\nyu_croped'
+    dataset_path = os.path.join('D:\\', 'nyu_croped')
+    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=(256, 256), outres=(64, 64), is_train=False, is_pretrain=False)
 
     total_suc, total_fail = 0, 0
     threshold = 0.5
@@ -130,4 +132,4 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # run_eval(args.resume_model_json, args.resume_model, 1)
-    run_eval('..\\..\\trained_models\\hg_nyu_001\\net_arch.json', '..\\..\\trained_models\\hg_nyu_001\\weights_epoch86.h5', 1)
+    run_eval('..\\..\\trained_models\\hg_nyu_004\\net_arch.json', '..\\..\\trained_models\\hg_nyu_004\\weights_epoch56.h5', 1)

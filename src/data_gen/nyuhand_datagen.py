@@ -42,12 +42,21 @@ class NYUHandDataGen(object):
             #     val_anno.append(annot[0, i, hand_points, :])
 
         if self.is_train and self.is_pretrain:
-            train_annot_idx = annot_idx[:train_val_treshold]
-            return _anno, shuffle(train_annot_idx)[:32]
+            # train_annot_idx = annot_idx[:train_val_treshold]
+            # shuffle(train_annot_idx)
+            # return _anno, train_annot_idx[:32]
+            return _anno, np.array([23215, 41008, 50594, 48660, 41447,  6279, 15487, 16105, 12193,
+       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+       32204, 35710, 41101, 27014, 15693])
         elif self.is_train:
             return _anno, annot_idx[:train_val_treshold]
         else:
-            return _anno, annot_idx[train_val_treshold:]
+            # return _anno, annot_idx[train_val_treshold:]
+            return _anno, np.array([23215, 41008, 50594, 48660, 41447,  6279, 15487, 16105, 12193,
+       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+       32204, 35710, 41101, 27014, 15693])
 
     def get_dataset_size(self):
         return len(self.anno_idx)
@@ -77,7 +86,7 @@ class NYUHandDataGen(object):
             if is_shuffle:
                 shuffle(self.anno_idx)
 
-            for i, kpanno_idx in enumerate(train_idx):
+            for i, kpanno_idx in enumerate(self.anno_idx):
                 kpanno = self.anno[kpanno_idx]
                 _imageaug, _gthtmap, _meta = self.process_image(kpanno_idx, kpanno, sigma, rot_flag, scale_flag, flip_flag)
                 _index = i % batch_size
@@ -107,7 +116,7 @@ class NYUHandDataGen(object):
         # create heatmaps
         heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, sigma, self.outres)
 
-        if self.debug:
+        if not self.debug:
             orig_image = cv2.resize(image, dsize=(480, 480), interpolation=cv2.INTER_CUBIC) / 255.0
             im = np.concatenate([orig_image, np.sum(orig_size_map, axis=-1)[:,:,np.newaxis]], axis=-1)
             
