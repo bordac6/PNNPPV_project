@@ -2,8 +2,10 @@ import sys
 
 sys.path.insert(0, "../data_gen/")
 sys.path.insert(0, "../eval/")
+sys.path.insert(0, "../tools/")
 
 import os
+import config_reader
 from hg_blocks import create_hourglass_network, euclidean_loss, bottleneck_block, bottleneck_mobile
 from mpii_datagen import MPIIDataGen
 from nyuhand_datagen import NYUHandDataGen
@@ -40,12 +42,12 @@ class HourglassNet(object):
             self.model.summary()
 
     def train(self, batch_size, model_path, epochs):
-        dataset_path = os.path.join('D:\\', 'nyu_croped')
+        # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         # dataset_path = '../../data/nyu_croped/'
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_pretrain=True)
-        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
-                                            rot_flag=True, scale_flag=True, flip_flag=True)
+        dataset_path = config_reader.load_path()
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
+        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         csvlogger = CSVLogger(
             os.path.join(model_path, "csv_train_" + str(datetime.datetime.now().strftime('%H:%M')) + ".csv"))
@@ -64,8 +66,9 @@ class HourglassNet(object):
         self.model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
-        dataset_path = '/home/tomas_bordac/nyu_croped'
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_pretrain=True)
+        # dataset_path = '/home/tomas_bordac/nyu_croped'
+        dataset_path = config_reader.load_path()
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
 
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
                                             rot_flag=True, scale_flag=True, flip_flag=True)

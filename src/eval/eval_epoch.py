@@ -5,6 +5,9 @@ import cv2
 import os
 
 sys.path.insert(0, "../data_gen/")
+sys.path.insert(0, "../tools/")
+
+import config_reader
 from nyuhand_datagen import NYUHandDataGen
 from heatmap_process import post_process_heatmap
 from keras.models import load_model, model_from_json
@@ -14,6 +17,11 @@ from keras.losses import mean_squared_error
 show_outputs = False
 
 def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
+    print('prediction: {}'.format(pre_kp))
+    print('ground true: {}'.format(gt_kp))
+    print('Euklidean distance: {}'.format(np.linalg.norm(gt_kp[0:2] - pre_kp[0:2])))
+    print('Euklidean div by norm: {}'.format(np.linalg.norm(gt_kp[0:2] - pre_kp[0:2])/norm))
+    
     if gt_kp[0] > 1 and gt_kp[1] > 1:
         dif = np.linalg.norm(gt_kp[0:2] - pre_kp[0:2]) / norm
         if dif < threshold:
@@ -33,7 +41,7 @@ def heatmap_accuracy(predhmap, meta, norm, threshold):
     good_pred_count = 0
     failed_pred_count = 0
     for i in range(gt_kps.shape[0]):
-        dis = cal_kp_distance(pred_kps[i, :] * 7.5, gt_kps[i, :], norm, threshold)
+        dis = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / 7.5, norm, threshold)
         if dis == 0:
             failed_pred_count += 1
         elif dis == 1:
@@ -45,7 +53,7 @@ def cal_heatmap_acc(prehmap, metainfo, threshold):
     sum_good, sum_fail = 0, 0
     for i in range(prehmap.shape[0]):
         _prehmap = prehmap[i, :, :, :]
-        good, bad = heatmap_accuracy(_prehmap, metainfo[i], norm=6.4, threshold=threshold)
+        good, bad = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold)
 
         sum_good += good
         sum_fail += bad
@@ -64,11 +72,12 @@ def run_eval(model_json, model_weights, epoch):
 
     # dataset_path = '/home/tomas_bordac/nyu_croped'
     # dataset_path = '..\\..\\data\\nyu_croped'
-    dataset_path = os.path.join('D:\\', 'nyu_croped')
-    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=(256, 256), outres=(64, 64), is_train=False, is_pretrain=False)
+    # dataset_path = os.path.join('D:\\', 'nyu_croped')
+    dataset_path = config_reader.load_path()
+    valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=(256, 256), outres=(64, 64), is_train=False, is_testtrain=False)
 
     total_suc, total_fail = 0, 0
-    threshold = 0.5
+    threshold = 1
 
     count = 0
     batch_size = 8
@@ -81,7 +90,7 @@ def run_eval(model_json, model_weights, epoch):
         out = model.predict(_img)
         pred_map_batch = out[-1]
 
-        if not show_outputs:
+        if show_outputs:
             for i in range(batch_size):
                 orig_image = cv2.resize(_img[i], dsize=(480, 480), interpolation=cv2.INTER_CUBIC)
                 kpanno = _meta[i]['tpts']
@@ -104,9 +113,10 @@ def run_eval(model_json, model_weights, epoch):
                 cv2.imshow('gt heatmap', np.sum(_gthmap[-1][i], axis=-1))
 
                 cv2.imshow('pred with heatmaps', _img[i])
-                cv2.imshow('pred heatmap', cv2.resize(np.sum(pred_heatmaps, axis=-1), dsize=(256, 256), interpolation=cv2.INTER_CUBIC))
+                cv2.imshow('pred heatmaps', cv2.resize(np.sum(pred_heatmaps, axis=-1), dsize=(256, 256), interpolation=cv2.INTER_CUBIC))
+                cv2.imshow('pred heatmap', cv2.resize(pred_heatmaps[0], dsize=(256, 256), interpolation=cv2.INTER_CUBIC))
                 
-                cv2.waitKey(0) # FIXME
+                cv2.waitKey(0)
 
         suc, bad = cal_heatmap_acc(out[-1], _meta, threshold)
 
@@ -115,14 +125,15 @@ def run_eval(model_json, model_weights, epoch):
 
         print('success: {}'.format(suc))
         print('bad: {}'.format(bad))
-        input()
+        if bad > 0:
+            input()
 
     acc = total_suc * 1.0 / (total_fail + total_suc)
 
     print('Eval Accuray ', acc, '@ Epoch ', epoch)
 
-    with open(os.path.join('./', 'val.txt'), 'a+') as xfile:
-        xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + '\n')
+    # with open(os.path.join('./', 'val.txt'), 'a+') as xfile:
+    #     xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + '\n')
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser()

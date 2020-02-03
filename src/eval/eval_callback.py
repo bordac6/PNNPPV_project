@@ -19,11 +19,10 @@ class EvalCallBack(keras.callbacks.Callback):
     def run_eval(self, epoch):
         dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
-        valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False, is_pretrain=False)
+        valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False, is_testtrain=False)
 
         total_suc, total_fail = 0, 0
-        threshold = 5
-        # threshold = 0.5
+        threshold = 0.5
 
         count = 0
         batch_size = 8

@@ -12,7 +12,7 @@ from hourglass import HourglassNet
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpuID", default=0, type=int, help='gpu id')
-    parser.add_argument("--mobile", default=True, help="use depthwise conv in hourglass'")
+    parser.add_argument("--mobile", default=False, help="use depthwise conv in hourglass'")
     parser.add_argument("--batch_size", default=8, type=int, help='batch size for training')
     parser.add_argument("--model_path", help='path to store trained model')
     parser.add_argument("--num_stack", default=2, type=int, help='num of stacks')
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         xnet = HourglassNet(num_classes=16, num_stacks=args.num_stack, num_channels=128, inres=(192, 192),
                             outres=(48, 48))
     else:
-        xnet = HourglassNet(num_classes=11, num_stacks=args.num_stack, num_channels=256, inres=(256, 256),
+        xnet = HourglassNet(num_classes=11, num_stacks=args.num_stack, num_channels=16, inres=(256, 256),
                             outres=(64, 64))
 
     if args.resume:
