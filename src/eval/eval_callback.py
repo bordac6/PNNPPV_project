@@ -1,6 +1,7 @@
 import keras
 import os
 import datetime
+import config_reader
 from time import time
 from nyuhand_datagen import NYUHandDataGen
 from eval_heatmap import cal_heatmap_acc
@@ -17,8 +18,9 @@ class EvalCallBack(keras.callbacks.Callback):
         return self.foldpath
 
     def run_eval(self, epoch):
-        dataset_path = os.path.join('D:\\', 'nyu_croped')
+        # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
+        dataset_path = config_reader.load_path()
         valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False, is_testtrain=False)
 
         total_suc, total_fail = 0, 0
