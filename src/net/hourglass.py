@@ -41,6 +41,9 @@ class HourglassNet(object):
         if show:
             self.model.summary()
 
+    def euclidean_loss(x, y):
+        return K.sqrt(K.sum(K.square(x - y)))
+
     def train(self, batch_size, model_path, epochs):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
@@ -63,7 +66,7 @@ class HourglassNet(object):
     def resume_train(self, batch_size, model_json, model_weights, init_epoch, epochs):
 
         self.load_model(model_json, model_weights)
-        self.model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
+        self.model.compile(optimizer=Adam(), loss=self.euclidean_loss, metrics=["accuracy"])
 
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
