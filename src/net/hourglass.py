@@ -19,7 +19,7 @@ from data_process import normalize
 import numpy as np
 from eval_callback import EvalCallBack
 import imageio
-
+import keras.backend as K
 
 class HourglassNet(object):
 
@@ -73,8 +73,7 @@ class HourglassNet(object):
         dataset_path = config_reader.load_path()
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
 
-        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True,
-                                            rot_flag=True, scale_flag=True, flip_flag=True)
+        train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         model_dir = os.path.dirname(os.path.abspath(model_json))
         print(model_dir, model_json)
