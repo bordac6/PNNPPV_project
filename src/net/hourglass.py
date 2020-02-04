@@ -41,7 +41,7 @@ class HourglassNet(object):
         if show:
             self.model.summary()
 
-    def euclidean_loss(x, y):
+    def euclidean_loss(self, x, y):
         return K.sqrt(K.sum(K.square(x - y)))
 
     def train(self, batch_size, model_path, epochs):
