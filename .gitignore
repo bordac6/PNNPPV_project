@@ -1,3 +1,6 @@
 *.pyc
 .idea
 trained_models
+config.json
+_start_training.txt
+data/

@@ -67,10 +67,7 @@ class HourglassNet(object):
                 cooldown=2,
                 mode='auto')
 
-        logdir = "./logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        tensorboard_callback = TensorBoard(log_dir=logdir)
-
-        xcallbacks = [csvlogger, checkpoint, lr_reducer, tensorboard_callback]
+        xcallbacks = [csvlogger, checkpoint, lr_reducer]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
@@ -78,7 +75,7 @@ class HourglassNet(object):
     def resume_train(self, batch_size, model_json, model_weights, init_epoch, epochs):
 
         self.load_model(model_json, model_weights)
-        self.model.compile(optimizer=Adam(), loss=self.euclidean_loss, metrics=["accuracy"])
+        self.model.compile(optimizer=Adam(lr=5e-2), loss=mean_squared_error, metrics=["accuracy"])
 
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
@@ -94,9 +91,16 @@ class HourglassNet(object):
 
         checkpoint = EvalCallBack(model_dir, self.inres, self.outres)
 
-        xcallbacks = [csvlogger, checkpoint]
+        lr_reducer = ReduceLROnPlateau(monitor='loss',
+                factor=0.8,
+                patience=3,
+                verbose=1,
+                cooldown=2,
+                mode='auto')
 
-        self.model.fit_generator(generator=train_gen, steps_per_epoch=train_dataset.get_dataset_size() // batch_size,
+        xcallbacks = [csvlogger, checkpoint, lr_reducer]
+
+        self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  initial_epoch=init_epoch, epochs=epochs, callbacks=xcallbacks)
 
     def load_model(self, modeljson, modelfile):
