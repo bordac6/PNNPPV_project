@@ -78,7 +78,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False):
     threshold = 1
 
     count = 0
-    batch_size = 8
+    batch_size = 1
     for _img, _gthmap, _meta in valdata.generator(batch_size, 2, sigma=3, is_shuffle=False, with_meta=True):
 
         count += batch_size
@@ -142,4 +142,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # run_eval(args.resume_model_json, args.resume_model, 1)
-    run_eval('..\\..\\trained_models\\hg_nyu_101\\net_arch.json', '..\\..\\trained_models\\hg_nyu_001\\weights_epoch43.h5', 1, args.show_outputs)
+    run_eval('..\\..\\trained_models\\hg_nyu_101\\net_arch.json', '..\\..\\trained_models\\hg_nyu_101\\weights_epoch190.h5', 1, args.show_outputs)

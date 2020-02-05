@@ -18,8 +18,9 @@ class NYUHandDataGen(object):
         self.outres = outres
         self.is_train = is_train
         self.is_testtrain = is_testtrain
-        self.nparts = 11
         self.anno, self.anno_idx = self._load_image_annotation()
+        self.nparts = np.array(self.anno).shape[1]
+        print('number of heatmaps: {}'.format(self.nparts))
 
         self.debug = False
 
@@ -29,7 +30,7 @@ class NYUHandDataGen(object):
         annot = annot_data['joint_uvd']
         nsamples = annot.shape[1]
         train_val_treshold = int(np.ceil(nsamples * 0.8))
-        hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        hand_points = [0]#, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
         annot_idx = np.arange(nsamples)
 
         # val_anno, train_anno = [], []

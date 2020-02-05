@@ -5,6 +5,8 @@ import config_reader
 from time import time
 from nyuhand_datagen import NYUHandDataGen
 from eval_heatmap import cal_heatmap_acc
+import cv2
+import numpy as np
 
 
 class EvalCallBack(keras.callbacks.Callback):
@@ -35,8 +37,18 @@ class EvalCallBack(keras.callbacks.Callback):
                 break
 
             out = self.model.predict(_img)
+            kp = _meta[0]['tpts']
 
-            suc, bad = cal_heatmap_acc(out[-1], _meta, threshold)
+            if True:
+                for i in range(batch_size):
+                    
+                    im3 = cv2.hconcat([out[-1][i,:,:,0]])
+                    cv2.circle(im3, (int(kp[0,0]/7.5), int(kp[0,1]/7.5)), 5, (155,155,155), 2)
+                    cv2.imshow('first two predicted htamps', im3)
+                    
+                    cv2.waitKey(0)
+
+            suc, bad = cal_heatmap_acc(_gthmap[-1], _meta, threshold)
 
             total_suc += suc
             total_fail += bad

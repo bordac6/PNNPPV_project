@@ -155,7 +155,7 @@ def generate_gtmap(joints, sigma, outres):
     for i in range(npart):
         visibility = joints[i, 2]
         if visibility > 0:
-            hmap[:, :, i] = draw_labelmap(hmap[:, :, i], joints[i, :], sigma)
+            hmap[:, :, i] = draw_labelmap(hmap[:, :, i], joints[i, :], 15)
             gtmap[:, :, i] = cv2.resize(hmap[:,:480, i], dsize=(outres[1], outres[0]), interpolation=cv2.INTER_CUBIC)
     
     # return gtmap
