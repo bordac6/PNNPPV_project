@@ -27,7 +27,7 @@ class EvalCallBack(keras.callbacks.Callback):
         threshold = 0.5
 
         count = 0
-        batch_size = 8
+        batch_size = 1
         for _img, _gthmap, _meta in valdata.generator(batch_size, 2, sigma=3, is_shuffle=False, with_meta=True):
 
             count += batch_size
