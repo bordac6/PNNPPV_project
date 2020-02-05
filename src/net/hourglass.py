@@ -20,6 +20,7 @@ import numpy as np
 from eval_callback import EvalCallBack
 import imageio
 import keras.backend as K
+from keras.callbacks import TensorBoard
 
 class HourglassNet(object):
 
@@ -58,9 +59,19 @@ class HourglassNet(object):
 
         checkpoint = EvalCallBack(model_path, self.inres, self.outres)
 
-        xcallbacks = [csvlogger, checkpoint]
+        lr_reducer = ReduceLROnPlateau(monitor='loss',
+                factor=0.8,
+                patience=3,
+                verbose=1,
+                cooldown=2,
+                mode='auto')
 
-        self.model.fit_generator(generator=train_gen, steps_per_epoch=train_dataset.get_dataset_size() // batch_size,
+        logdir = "./logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        tensorboard_callback = TensorBoard(log_dir=logdir)
+
+        xcallbacks = [csvlogger, checkpoint, lr_reducer, tensorboard_callback]
+
+        self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
 
     def resume_train(self, batch_size, model_json, model_weights, init_epoch, epochs):
