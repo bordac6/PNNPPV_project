@@ -20,6 +20,7 @@ import numpy as np
 from eval_callback import EvalCallBack
 import imageio
 import keras.backend as K
+from keras.callbacks import ReduceLROnPlateau
 from keras.callbacks import TensorBoard
 
 class HourglassNet(object):
