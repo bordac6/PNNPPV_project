@@ -14,8 +14,6 @@ from keras.models import load_model, model_from_json
 from keras.optimizers import Adam, RMSprop
 from keras.losses import mean_squared_error
 
-show_outputs = False
-
 def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
     print('prediction: {}'.format(pre_kp))
     print('ground true: {}'.format(gt_kp))
@@ -66,7 +64,7 @@ def load_model(modeljson, modelfile):
     model.load_weights(modelfile)
     return model
 
-def run_eval(model_json, model_weights, epoch):
+def run_eval(model_json, model_weights, epoch, show_outputs=False):
     model = load_model(model_json, model_weights)
     model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
 
@@ -136,11 +134,12 @@ def run_eval(model_json, model_weights, epoch):
     #     xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + '\n')
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--show_outputs", default=False, help="boolean to show predicted/gt heatmaps and points in test image")
     # parser.add_argument("--resume_model", help="start point to retrain")
     # parser.add_argument("--resume_model_json", help="model json")
 
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
     # run_eval(args.resume_model_json, args.resume_model, 1)
-    run_eval('..\\..\\trained_models\\hg_nyu_004\\net_arch.json', '..\\..\\trained_models\\hg_nyu_004\\weights_epoch56.h5', 1)
+    run_eval('..\\..\\trained_models\\hg_nyu_101\\net_arch.json', '..\\..\\trained_models\\hg_nyu_001\\weights_epoch43.h5', 1, args.show_outputs)
