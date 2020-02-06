@@ -134,7 +134,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False):
     print('mean distance {}; median distance {}'.format(np.mean(total_arr_mean), np.median(total_arr_med)))
 
     # with open(os.path.join('./', 'val.txt'), 'a+') as xfile:
-    #     xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + '\n')
+    #     xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + ':' + str(np.mean(total_arr_mean)) + ':' + str(np.median(total_arr_med)) '\n')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
