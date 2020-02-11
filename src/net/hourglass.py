@@ -67,7 +67,7 @@ class HourglassNet(object):
                 cooldown=2,
                 mode='auto')
 
-        xcallbacks = [csvlogger, checkpoint, lr_reducer]
+        xcallbacks = [csvlogger, checkpoint]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
@@ -114,7 +114,7 @@ class HourglassNet(object):
         imgdata = scipy.misc.imresize(rgbdata, self.inres)
 
         if mean is None:
-            mean = np.array([0.4404, 0.4440, 0.4327], dtype=np.float)
+            mean = np.array([0.285, 0.292, 0.304], dtype=np.float)
 
         imgdata = normalize(imgdata, mean)
 

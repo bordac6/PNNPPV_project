@@ -54,7 +54,10 @@ class NYUHandDataGen(object):
             return _anno, annot_idx[:train_val_treshold]
         else:
             # return _anno, annot_idx[train_val_treshold:]
-            return _anno, np.arange(100)+1
+            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
+       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+       32204, 35710, 41101, 27014, 15693])
 
     def get_dataset_size(self):
         return len(self.anno_idx)
