@@ -19,18 +19,15 @@ import matplotlib.pyplot as plt
 def render_joints(cvmat, joints, conf_th=0.2):
     for _joint in joints:
         _x, _y, _conf = _joint
-        if _conf > conf_th:
-            cv2.circle(cvmat, center=(int(_x), int(_y)), color=(255, 0, 0), radius=7, thickness=2)
+        if _conf < conf_th:
+            cv2.circle(cvmat, center=(int(_x), int(_y)), color=(255, 0, 0), radius=3, thickness=2)
 
     return cvmat
 
 
 def main_inference(model_json, model_weights, num_stack, num_class, imgfile, confth, tiny):
-    if tiny:
-        xnet = HourglassNet(num_classes=11, num_stacks=args.num_stack, num_channels=128, inres=(192, 192),
-                            outres=(48, 48))
-    else:
-        xnet = HourglassNet(num_classes=11, num_stacks=args.num_stack, num_channels=256, inres=(256, 256),
+    
+    xnet = HourglassNet(num_classes=11, num_stacks=args.num_stack, num_channels=256, inres=(256, 256),
                             outres=(64, 64))
 
     xnet.load_model(model_json, model_weights)

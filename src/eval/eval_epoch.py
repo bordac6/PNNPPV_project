@@ -150,4 +150,4 @@ if __name__ == "__main__":
             run_eval("..\\..\\trained_models\\hg_nyu_102\\net_arch.json", path, 1, args.show_outputs)
     else:
         # run_eval(args.resume_model_json, args.resume_model, 1)
-        run_eval("..\\..\\trained_models\\hg_nyu_102\\net_arch.json", "..\\..\\trained_models\\hg_nyu_102\\weights_epoch10.h5", 1, args.show_outputs)
+        run_eval("..\\..\\trained_models\\if_hm_32imgs_8kernels_2stacked\\net_arch.json", "..\\..\\trained_models\\if_hm_32imgs_8kernels_2stacked\\weights_epoch194.h5", 1, args.show_outputs)

@@ -7,8 +7,7 @@ sys.path.insert(0, "../tools/")
 import os
 import config_reader
 from hg_blocks import create_hourglass_network, euclidean_loss, bottleneck_block, bottleneck_mobile
-from mpii_datagen import MPIIDataGen
-from nyuhand_datagen import NYUHandDataGen
+from rhd_datagen import RhdDataGen
 from keras.callbacks import CSVLogger, ModelCheckpoint
 from keras.models import load_model, model_from_json
 from keras.optimizers import Adam, RMSprop
@@ -51,7 +50,7 @@ class HourglassNet(object):
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         # dataset_path = '../../data/nyu_croped/'
         dataset_path = config_reader.load_path()
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
+        train_dataset = RhdDataGen('anno_training.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         csvlogger = CSVLogger(
@@ -61,13 +60,14 @@ class HourglassNet(object):
         checkpoint = EvalCallBack(model_path, self.inres, self.outres)
 
         lr_reducer = ReduceLROnPlateau(monitor='loss',
-                factor=0.8,
-                patience=3,
+                factor=0.5,
+                patience=5,
                 verbose=1,
                 cooldown=2,
-                mode='auto')
+                mode='min',
+                min_lr=5e-6)
 
-        xcallbacks = [csvlogger, checkpoint]
+        xcallbacks = [csvlogger, checkpoint, lr_reducer]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
@@ -98,7 +98,7 @@ class HourglassNet(object):
                 cooldown=2,
                 mode='auto')
 
-        xcallbacks = [csvlogger, checkpoint, lr_reducer]
+        xcallbacks = [csvlogger, checkpoint]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  initial_epoch=init_epoch, epochs=epochs, callbacks=xcallbacks)
@@ -114,7 +114,7 @@ class HourglassNet(object):
         imgdata = scipy.misc.imresize(rgbdata, self.inres)
 
         if mean is None:
-            mean = np.array([0.285, 0.292, 0.304], dtype=np.float)
+            mean = np.array([0.279815019304931, 0.27522995093505725, 0.26897174478554214], dtype=np.float)
 
         imgdata = normalize(imgdata, mean)
 

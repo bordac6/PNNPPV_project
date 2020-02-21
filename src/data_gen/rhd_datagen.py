@@ -9,7 +9,7 @@ from scipy.io import loadmat
 import cv2
 import imageio
 
-class NYUHandDataGen(object):
+class RhdDataGen(object):
 
     def __init__(self, matfile, imgpath, inres, outres, is_train, is_testtrain):
         self.matfile = matfile
@@ -27,43 +27,41 @@ class NYUHandDataGen(object):
     def _load_image_annotation(self):
         # load train or val annotation
         annot_data = loadmat(os.path.join(self.imgpath, self.matfile))
-        annot = annot_data['joint_uvd']
-        nsamples = annot.shape[1]
-        train_val_treshold = int(np.ceil(nsamples * 0.8))
-        hand_points = [18]#, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        nsamples = 41258 #len(annot_data)
+        # hand_points = [5]
+        hand_points_left = np.array([0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19])
+        hand_points_right = hand_points_left + 21
         annot_idx = np.arange(nsamples)
 
         # val_anno, train_anno = [], []
         _anno = []
         for i in range(nsamples):
-            _anno.append(annot[0, i, hand_points, :])
-            # if  i < train_val_treshold:
-                # train_anno.append(annot[0, i, hand_points, :])
-            # else:
-            #     val_anno.append(annot[0, i, hand_points, :])
+            key_points = annot_data['frame'+str(i)]['uv_vis'][0,0]
+            left = np.sum(key_points[hand_points_left, 2])
+            right = np.sum(key_points[hand_points_right, 2])
+            hand_points = key_points[np.array([5]), :] if left > right else key_points[np.array([5])+21, :]
+
+            _anno.append(hand_points)
 
         if self.is_train and self.is_testtrain:
-            # train_annot_idx = annot_idx[:train_val_treshold]
-            # shuffle(train_annot_idx)
-            # return _anno, train_annot_idx[:32]
-            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693])
+            # shuffle(annot_idx)
+            # return _anno, annot_idx
+            return _anno, np.arange(43, 43+16)
         elif self.is_train:
-            return _anno, annot_idx[:train_val_treshold]
+            return _anno, annot_idx
         else:
             # return _anno, annot_idx[train_val_treshold:]
-            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693])
+            return _anno, np.arange(43, 43+16)
+    #         return _anno, np.array([43, 50,  51, 56, 430, 4300,
+    #    403, 4030, 62, 60, 61, 44, 45, 46,  47,
+    #    48])
 
     def get_dataset_size(self):
         return len(self.anno_idx)
 
     def get_color_mean(self):
-        mean = np.array([0.285, 0.292, 0.304])
+        # mean = np.array([0.285, 0.292, 0.304])
+        mean = np.array([0.279815019304931, 0.27522995093505725, 0.26897174478554214])
         return mean
 
     def get_annotations(self):
@@ -106,7 +104,7 @@ class NYUHandDataGen(object):
                         yield train_input, out_hmaps
 
     def process_image(self, sample_index, kpanno, sigma):
-        imagefile = 'rgb_1_'+ str(sample_index+1).zfill(7) +'.jpg'
+        imagefile = str(sample_index).zfill(5) +'.png'
         image = imageio.imread(os.path.join(self.imgpath, imagefile))
     
         norm_image = data_process.normalize(image, self.get_color_mean()) #FIXME
@@ -116,12 +114,12 @@ class NYUHandDataGen(object):
         heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, sigma, self.outres)
 
         if self.debug:
-            orig_image = cv2.resize(image, dsize=(480, 480), interpolation=cv2.INTER_CUBIC) / 255.0
-            im = np.concatenate([orig_image, np.sum(orig_size_map, axis=-1)[:,:,np.newaxis]], axis=-1)
+            orig_image = cv2.resize(image, dsize=(320, 320), interpolation=cv2.INTER_CUBIC) / 255.0
             
             for i in range(kpanno.shape[0]):
                 x = kpanno[i, 0]
                 y = kpanno[i, 1]
+                print('X: {}, Y: {}'.format(x, y))
                 orig_image = cv2.circle(orig_image, (int(x), int(y)), 5, (0,0,255), 2)
 
             cv2.imshow('orig {} with heatmaps GENERATOR'.format(sample_index), orig_image)
@@ -145,37 +143,3 @@ class NYUHandDataGen(object):
                 'wrist'
                 ]
         return keys
-
-    def flip(self, image, joints, center):
-
-        import cv2
-
-        joints = np.copy(joints)
-
-        matchedParts = (
-            [0, 5],  # ankle
-            [1, 4],  # knee
-            [2, 3],  # hip
-            [10, 15],  # wrist
-            [11, 14],  # elbow
-            [12, 13]  # shoulder
-        )
-
-        org_height, org_width, channels = image.shape
-
-        # flip image
-        flipimage = cv2.flip(image, flipCode=1)
-
-        # flip each joints
-        joints[:, 0] = org_width - joints[:, 0]
-
-        for i, j in matchedParts:
-            temp = np.copy(joints[i, :])
-            joints[i, :] = joints[j, :]
-            joints[j, :] = temp
-
-        # center
-        flip_center = center
-        flip_center[0] = org_width - center[0]
-
-        return flipimage, joints, flip_center

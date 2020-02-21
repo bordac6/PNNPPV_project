@@ -24,10 +24,14 @@ def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
         if dif < threshold:
             # good prediction
             return 1, dif
+        elif dif < threshold + 0.3:
+            return 2, dif
         else:  # failed
             return 0, dif
     else:
-        return -1, dif
+        print('WRONG')
+        print(gt_kp)
+        return -1, 255
 
 
 def heatmap_accuracy(predhmap, meta, norm, threshold):
@@ -38,28 +42,33 @@ def heatmap_accuracy(predhmap, meta, norm, threshold):
 
     good_pred_count = 0
     failed_pred_count = 0
+    almost_pred_count = 0
     arr_dif = []
     for i in range(gt_kps.shape[0]):
-        dis, dif = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / 7.5, norm, threshold)
+        dis, dif = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / 4, norm, threshold)
         if dis == 0:
             failed_pred_count += 1
         elif dis == 1:
             good_pred_count += 1
-        arr_dif.append(dif)
+        elif dis == 2:
+            almost_pred_count += 1
+        if dif < 255:
+            arr_dif.append(dif)
 
-    return good_pred_count, failed_pred_count, arr_dif
+    return good_pred_count, failed_pred_count, almost_pred_count, arr_dif
 
 
 def cal_heatmap_acc(prehmap, metainfo, threshold):
-    sum_good, sum_fail = 0, 0
+    sum_good, sum_fail, sum_almost = 0, 0, 0
     arr_mean, arr_med = [], []
     for i in range(prehmap.shape[0]):
         _prehmap = prehmap[i, :, :, :]
-        good, bad, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold) #norm fitted on gtmap
+        good, bad, almost, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold) #norm fitted on gtmap
 
         sum_good += good
         sum_fail += bad
+        sum_almost += almost
         arr_mean.append(np.mean(arr_dif))
         arr_med.append(np.median(arr_dif))
 
-    return sum_good, sum_fail, np.mean(arr_mean), np.median(arr_med)
+    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med)

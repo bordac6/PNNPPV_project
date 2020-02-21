@@ -4,7 +4,8 @@ from keras.optimizers import Adam, RMSprop
 from keras.losses import mean_squared_error
 import keras.backend as K
 
-
+# default initializer: xavier
+# https://stackoverflow.com/questions/43284047/what-is-the-default-kernel-initializer-in-tf-layers-conv2d-and-tf-layers-dense
 def create_hourglass_network(num_classes, num_stacks, num_channels, inres, outres, bottleneck):
     input = Input(shape=(inres[0], inres[1], 3))
 
@@ -19,7 +20,8 @@ def create_hourglass_network(num_classes, num_stacks, num_channels, inres, outre
 
     model = Model(inputs=input, outputs=outputs)
     rms = RMSprop(lr=5e-4)
-    model.compile(optimizer=Adam(lr=5e-2), loss=mean_squared_error, metrics=["accuracy"])
+    adam = Adam(lr=5e-1)
+    model.compile(optimizer=adam, loss=mean_squared_error, metrics=["accuracy"])
 
     return model
 
