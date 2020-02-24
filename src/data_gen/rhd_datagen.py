@@ -129,7 +129,7 @@ class RhdDataGen(object):
             cv2.waitKey(0) # FIXME
 
         # meta info
-        metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile}
+        metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile, 'scale': 4}
 
         return norm_image, heatmaps, metainfo
 

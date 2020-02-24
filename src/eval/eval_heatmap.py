@@ -39,13 +39,14 @@ def heatmap_accuracy(predhmap, meta, norm, threshold):
     pred_kps = np.array(pred_kps)
 
     gt_kps = meta['tpts']
+    scale = meta['scale']
 
     good_pred_count = 0
     failed_pred_count = 0
     almost_pred_count = 0
     arr_dif = []
     for i in range(gt_kps.shape[0]):
-        dis, dif = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / 4, norm, threshold)
+        dis, dif = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / scale, norm, threshold)
         if dis == 0:
             failed_pred_count += 1
         elif dis == 1:
@@ -63,7 +64,7 @@ def cal_heatmap_acc(prehmap, metainfo, threshold):
     arr_mean, arr_med = [], []
     for i in range(prehmap.shape[0]):
         _prehmap = prehmap[i, :, :, :]
-        good, bad, almost, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold) #norm fitted on gtmap
+        good, bad, almost, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold) #norm fitted on gtmap NYUhand
 
         sum_good += good
         sum_fail += bad

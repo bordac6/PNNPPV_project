@@ -46,18 +46,20 @@ class NYUHandDataGen(object):
             # train_annot_idx = annot_idx[:train_val_treshold]
             # shuffle(train_annot_idx)
             # return _anno, train_annot_idx[:32]
-            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693])
+            return _anno, np.array([34948])
+    #         , 41447,  6279, 15487, 16105, 12193,
+    #    39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+    #    25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+    #    32204, 35710, 41101, 27014, 15693])
         elif self.is_train:
             return _anno, annot_idx[:train_val_treshold]
         else:
             # return _anno, annot_idx[train_val_treshold:]
-            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693])
+            return _anno, np.array([34948])
+    #         , 41447,  6279, 15487, 16105, 12193,
+    #    39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+    #    25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+    #    32204, 35710, 41101, 27014, 15693])
 
     def get_dataset_size(self):
         return len(self.anno_idx)
@@ -131,7 +133,7 @@ class NYUHandDataGen(object):
             cv2.waitKey(0) # FIXME
 
         # meta info
-        metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile}
+        metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile, 'scale': 7.5}
 
         return norm_image, heatmaps, metainfo
 

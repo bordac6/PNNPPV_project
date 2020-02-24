@@ -44,8 +44,8 @@ if __name__ == "__main__":
         xnet = HourglassNet(num_classes=16, num_stacks=args.num_stack, num_channels=128, inres=(192, 192),
                             outres=(48, 48))
     else:
-        xnet = HourglassNet(num_classes=1, num_stacks=args.num_stack, num_channels=8, inres=(320, 320),
-                            outres=(80, 80))
+        xnet = HourglassNet(num_classes=1, num_stacks=args.num_stack, num_channels=8, inres=(256, 256),
+                            outres=(64, 64))
 
     if args.resume:
         xnet.resume_train(batch_size=args.batch_size, model_json=args.resume_model_json,

@@ -4,7 +4,6 @@ import datetime
 import config_reader
 from time import time
 from nyuhand_datagen import NYUHandDataGen
-from rhd_datagen import RhdDataGen
 from eval_heatmap import cal_heatmap_acc
 import cv2
 import numpy as np
@@ -27,15 +26,16 @@ class EvalCallBack(keras.callbacks.Callback):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         dataset_path = config_reader.load_path()
-        valdata = RhdDataGen('anno_training.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False, is_testtrain=False)
+        valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False, is_testtrain=False)
 
         total_suc, total_fail, total_suc_bigger, total_fail_bigger = 0, 0, 0, 0
         total_arr_mean, total_arr_med = [], []
         threshold = 0.2
+        n_stacked = 2
 
         count = 0
         batch_size = 1
-        for _img, _gthmap, _meta in valdata.generator(batch_size, 8, sigma=3, is_shuffle=False, with_meta=True):
+        for _img, _gthmap, _meta in valdata.generator(batch_size, n_stacked, sigma=3, is_shuffle=False, with_meta=True):
 
             count += batch_size
             if count > valdata.get_dataset_size():
@@ -46,7 +46,8 @@ class EvalCallBack(keras.callbacks.Callback):
             if count+batch_size > valdata.get_dataset_size():
                 for i in range(1):
                     kp = _meta[i]['tpts']
-                    orig_image = cv2.resize(_img[i], dsize=(self.inres[0], self.inres[1]), interpolation=cv2.INTER_CUBIC)
+                    scale = _meta[i]['scale']
+                    orig_image = cv2.resize(_img[i], dsize=(480, 480), interpolation=cv2.INTER_CUBIC)
                     pred_kps = post_process_heatmap(out[-1][i])
                     pred_kps = np.array(pred_kps)
                     
@@ -56,11 +57,11 @@ class EvalCallBack(keras.callbacks.Callback):
                         print_image[:,:,0] = out[-1][i,:,:,j]
                         print_image[:,:,1] = out[-1][i,:,:,j]
                         print_image[:,:,2] = out[-1][i,:,:,j]
-                        cv2.circle(print_image, (int(kp[j,0]/4), int(kp[j,1]/4)), 5, (0,0,255), 2)
+                        cv2.circle(print_image, (int(kp[j,0]/scale), int(kp[j,1]/scale)), 5, (0,0,255), 2)
                         cv2.circle(print_image, (int(pred_kps[j,0]), int(pred_kps[j,1])), 5, (255,0,0), 2)
                         imgs += (print_image,)
                         cv2.circle(orig_image, (int(kp[j,0]), int(kp[j,1])), 5, (0,0,255), 2)
-                        cv2.circle(orig_image, (int(pred_kps[j,0]*4), int(pred_kps[j,1]*4)), 5, (255,0,0), 2)
+                        cv2.circle(orig_image, (int(pred_kps[j,0]*scale), int(pred_kps[j,1]*scale)), 5, (255,0,0), 2)
 
                     all_images = np.hstack(imgs)
 
@@ -68,7 +69,7 @@ class EvalCallBack(keras.callbacks.Callback):
                     cv2.imshow('Predicted htamps {}'.format(i), all_images)
                     cv2.imshow('Image with predicted joints {}'.format(i), orig_image)
                     
-            for k in range(8):
+            for k in range(n_stacked):
                 layers = tuple()
                 for i in range(out[-1].shape[-1]):
                     layers += (out[k][0,:,:,i],)

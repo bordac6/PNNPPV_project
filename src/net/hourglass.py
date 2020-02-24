@@ -7,7 +7,7 @@ sys.path.insert(0, "../tools/")
 import os
 import config_reader
 from hg_blocks import create_hourglass_network, euclidean_loss, bottleneck_block, bottleneck_mobile
-from rhd_datagen import RhdDataGen
+from nyuhand_datagen import NYUHandDataGen
 from keras.callbacks import CSVLogger, ModelCheckpoint
 from keras.models import load_model, model_from_json
 from keras.optimizers import Adam, RMSprop
@@ -50,7 +50,7 @@ class HourglassNet(object):
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         # dataset_path = '../../data/nyu_croped/'
         dataset_path = config_reader.load_path()
-        train_dataset = RhdDataGen('anno_training.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         csvlogger = CSVLogger(
@@ -114,7 +114,7 @@ class HourglassNet(object):
         imgdata = scipy.misc.imresize(rgbdata, self.inres)
 
         if mean is None:
-            mean = np.array([0.279815019304931, 0.27522995093505725, 0.26897174478554214], dtype=np.float)
+            mean = np.array([0.285, 0.292, 0.304])
 
         imgdata = normalize(imgdata, mean)
 
