@@ -50,7 +50,7 @@ class HourglassNet(object):
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         # dataset_path = '../../data/nyu_croped/'
         dataset_path = config_reader.load_path()
-        train_dataset = RhdDataGen('anno_training.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
+        train_dataset = RhdDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         csvlogger = CSVLogger(

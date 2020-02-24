@@ -60,7 +60,6 @@ class RhdDataGen(object):
         return len(self.anno_idx)
 
     def get_color_mean(self):
-        # mean = np.array([0.285, 0.292, 0.304])
         mean = np.array([0.279815019304931, 0.27522995093505725, 0.26897174478554214])
         return mean
 
@@ -129,7 +128,7 @@ class RhdDataGen(object):
             cv2.waitKey(0) # FIXME
 
         # meta info
-        metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile}
+        metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile, 'scale': 4}
 
         return norm_image, heatmaps, metainfo
 
