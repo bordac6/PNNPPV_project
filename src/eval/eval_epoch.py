@@ -35,13 +35,14 @@ def heatmap_accuracy(predhmap, meta, norm, threshold):
     pred_kps = np.array(pred_kps)
 
     gt_kps = meta['tpts']
+    scale = meta['scale']
 
     good_pred_count = 0
     failed_pred_count = 0
     almost_pred_count = 0
     arr_dif = []
     for i in range(gt_kps.shape[0]):
-        dis, dif = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / 4, norm, threshold)
+        dis, dif = cal_kp_distance(pred_kps[i, :], gt_kps[i, :] / scale, norm, threshold)
         if dis == 0:
             failed_pred_count += 1
         elif dis == 1:
@@ -79,6 +80,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
     model.compile(optimizer=RMSprop(lr=5e-4), loss=mean_squared_error, metrics=["accuracy"])
     _inres = (256, 256)
     _outres = (64, 64)
+    orig_size = 480
 
     # dataset_path = os.path.join('D:\\', 'nyu_croped')
     # dataset_path = '/home/tomas_bordac/nyu_croped'
@@ -103,7 +105,8 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
         if count+batch_size > valdata.get_dataset_size():
             for i in range(1):
                 kp = _meta[i]['tpts']
-                orig_image = cv2.resize(_img[i], dsize=(_inres[0], _inres[1]), interpolation=cv2.INTER_CUBIC)
+                scale = _meta[i]['scale']
+                orig_image = cv2.resize(_img[i], dsize=(orig_size, orig_size), interpolation=cv2.INTER_CUBIC)
                 pred_kps = post_process_heatmap(out[-1][i])
                 pred_kps = np.array(pred_kps)
                 
@@ -113,11 +116,11 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
                     print_image[:,:,0] = out[-1][i,:,:,j]
                     print_image[:,:,1] = out[-1][i,:,:,j]
                     print_image[:,:,2] = out[-1][i,:,:,j]
-                    cv2.circle(print_image, (int(kp[j,0]/4), int(kp[j,1]/4)), 5, (0,0,255), 2)
+                    cv2.circle(print_image, (int(kp[j,0]/scale), int(kp[j,1]/scale)), 5, (0,0,255), 2)
                     cv2.circle(print_image, (int(pred_kps[j,0]), int(pred_kps[j,1])), 5, (255,0,0), 2)
                     imgs += (print_image,)
                     cv2.circle(orig_image, (int(kp[j,0]), int(kp[j,1])), 5, (0,0,255), 2)
-                    cv2.circle(orig_image, (int(pred_kps[j,0]*4), int(pred_kps[j,1]*4)), 5, (255,0,0), 2)
+                    cv2.circle(orig_image, (int(pred_kps[j,0]*scale), int(pred_kps[j,1]*scale)), 5, (255,0,0), 2)
 
                 all_images = np.hstack(imgs)
 
@@ -173,4 +176,4 @@ if __name__ == "__main__":
             run_eval("..\\..\\trained_models\\hg_nyu_102\\net_arch.json", path, 1, args.show_outputs)
     else:
         # run_eval(args.resume_model_json, args.resume_model, 1, True)
-        run_eval("..\\..\\trained_models\\nyu\\net_arch.json", "..\\..\\trained_models\\nyu\\weights_epoch0.h5", 1, args.show_outputs)
+        run_eval("..\\..\\trained_models_toshiba\\nyu\\net_arch.json", "..\\..\\trained_models_toshiba\\nyu\\weights_epoch0.h5", 1, args.show_outputs)
