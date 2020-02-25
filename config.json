@@ -1,0 +1,8 @@
+{
+    "dataset_path_rhd": "../../data/color/",
+    "dataset_path_nyu": "../../data/nyu_croped/",
+    "home": "D:\\nyu_croped",
+    "google_cloud": "/home/tomas_bordac/nyu_croped",
+    "frq": "../../data/nyu_croped/",
+    "val_path": "../../trained_models/hg_nyu_006/val.txt"
+}
