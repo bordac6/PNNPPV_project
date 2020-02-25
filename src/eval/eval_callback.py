@@ -25,7 +25,7 @@ class EvalCallBack(keras.callbacks.Callback):
     def run_eval(self, epoch):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
         # dataset_path = '/home/tomas_bordac/nyu_croped'
-        dataset_path = config_reader.load_path()
+        dataset_path = config_reader.load_path('dataset_path_nyu')
         valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=False, is_testtrain=False)
 
         total_suc, total_fail, total_suc_bigger, total_fail_bigger = 0, 0, 0, 0

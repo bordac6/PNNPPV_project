@@ -84,7 +84,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
 
     # dataset_path = os.path.join('D:\\', 'nyu_croped')
     # dataset_path = '/home/tomas_bordac/nyu_croped'
-    dataset_path = config_reader.load_path()
+    dataset_path = config_reader.load_path('dataset_path_nyu')
     valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=_inres, outres=_outres, is_train=False, is_testtrain=False)
 
     total_suc, total_fail, total_suc_bigger, total_fail_bigger = 0, 0, 0, 0

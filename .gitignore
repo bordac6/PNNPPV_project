@@ -1,6 +1,9 @@
 *.pyc
 .idea
 trained_models
+trained_models_toshiba
+trained_models_asus
 config.json
 _start_training.txt
 data/
+val.txt

@@ -30,7 +30,7 @@ class NYUHandDataGen(object):
         annot = annot_data['joint_uvd']
         nsamples = annot.shape[1]
         train_val_treshold = int(np.ceil(nsamples * 0.8))
-        hand_points = [18]#, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
         annot_idx = np.arange(nsamples)
 
         # val_anno, train_anno = [], []
@@ -111,11 +111,15 @@ class NYUHandDataGen(object):
         imagefile = 'rgb_1_'+ str(sample_index+1).zfill(7) +'.jpg'
         image = imageio.imread(os.path.join(self.imgpath, imagefile))
     
-        norm_image = data_process.normalize(image, self.get_color_mean()) #FIXME
-        # norm_image = image / 255.0
+        norm_image = data_process.normalize(image, self.get_color_mean())
 
         # create heatmaps
         heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, sigma, self.outres)
+        # print('heatmaps zero sum: ', np.sum(heatmaps==0))
+        # print('heatmaps gtzero sum: ', np.sum(heatmaps>0))
+        # print('heatmaps ltzero sum: ', np.sum(heatmaps<0))
+        # print('heatmaps max: ', np.max(heatmaps))
+        # print('heatmaps min: ', np.min(heatmaps))
 
         if self.debug:
             orig_image = cv2.resize(image, dsize=(480, 480), interpolation=cv2.INTER_CUBIC) / 255.0
@@ -135,7 +139,7 @@ class NYUHandDataGen(object):
         # meta info
         metainfo = {'sample_index': sample_index, 'tpts': kpanno, 'name': imagefile, 'scale': 7.5}
 
-        return norm_image, heatmaps, metainfo
+        return norm_image, heatmaps*10, metainfo
 
     @classmethod
     def get_kp_keys(cls):
