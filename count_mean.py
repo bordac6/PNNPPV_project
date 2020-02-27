@@ -7,7 +7,7 @@ import config_reader
 from scipy.io import loadmat
 import imageio
 
-dataset_path = config_reader.load_path('config.json')[6:]
+dataset_path = config_reader.load_path('dataset_path_nyu', 'config.json')[6:]
 annot_data = loadmat(os.path.join(dataset_path, 'joint_data.mat'))
 annot = annot_data['joint_uvd']
 nsamples = annot.shape[1]

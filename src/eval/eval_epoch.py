@@ -56,7 +56,7 @@ def heatmap_accuracy(predhmap, meta, norm, threshold):
 
 def cal_heatmap_acc(prehmap, metainfo, threshold):
     sum_good, sum_fail, sum_almost = 0, 0, 0
-    arr_mean, arr_med = [], []
+    arr_mean, arr_med, arr_distances = [], [], []
     for i in range(prehmap.shape[0]):
         _prehmap = prehmap[i, :, :, :]
         good, bad, almost, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold) #norm fitted on gtmap
@@ -66,8 +66,9 @@ def cal_heatmap_acc(prehmap, metainfo, threshold):
         sum_almost += almost
         arr_mean.append(np.mean(arr_dif))
         arr_med.append(np.median(arr_dif))
+        arr_distances.append(arr_dif)
 
-    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med)
+    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med), arr_distances
 
 def load_model(modeljson, modelfile):
     with open(modeljson) as f:
@@ -88,7 +89,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
     valdata = NYUHandDataGen('joint_data.mat', dataset_path, inres=_inres, outres=_outres, is_train=False, is_testtrain=False)
 
     total_suc, total_fail, total_suc_bigger, total_fail_bigger = 0, 0, 0, 0
-    total_arr_mean, total_arr_med = [], []
+    total_arr_mean, total_arr_med, arr_dists = [], [], []
     threshold = 0.2
     n_stacked = 2
 
@@ -136,7 +137,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
         
         cv2.waitKey(0)
         
-        suc, bad, between_thresholds, mean, med = cal_heatmap_acc(out[-1], _meta, threshold)
+        suc, bad, between_thresholds, mean, med, dists = cal_heatmap_acc(out[-1], _meta, threshold)
 
         total_suc += suc
         total_fail += (bad + between_thresholds)
@@ -144,16 +145,17 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
         total_fail_bigger += bad
         total_arr_mean.append(mean)
         total_arr_med.append(med)
+        arr_dists.append(dists)
 
     acc = total_suc * 1.0 / (total_fail + total_suc)
     acc_2 = total_suc_bigger * 1.0 / (total_fail_bigger + total_suc_bigger)
     acc_history.append(acc)
     acc2_history.append(acc_2)
 
-    print('Eval Accuray [0.2] ', acc, '@ Epoch ', epoch)
-    print('Eval Accuray [0.5] ', acc_2, '@ Epoch ', epoch)
+    print('Eval Accuray [{}] '.format(threshold), acc, '@ Epoch ', epoch)
+    print('Eval Accuray [{}] '.format(threshold+0.3), acc_2, '@ Epoch ', epoch)
     print('mean distance {}; median distance {}'.format(np.mean(total_arr_mean), np.median(total_arr_med)))
-    print('AVG max distance {}; min distance {}'.format(np.max(total_arr_mean), np.min(total_arr_mean)))
+    print('max distance {}; min distance {}'.format(np.max(arr_dists), np.min(arr_dists)))
 
     with open(os.path.join('./', 'val.txt'), 'a+') as xfile:
         xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + ':' + 
@@ -169,11 +171,12 @@ if __name__ == "__main__":
     parser.add_argument("--resume_model", help="start point to retrain")
     parser.add_argument("--resume_model_json", help="model json")
 
+    path = '..\\..\\trained_models\\nyu_pretrained_3\\'
     args = parser.parse_args()
     if args.all:
-        weights_paths = glob.glob("..\\..\\trained_models\\hg_nyu_102\\*.h5")
+        weights_paths = glob.glob(path+"*.h5")
         for path in weights_paths:
-            run_eval("..\\..\\trained_models\\hg_nyu_102\\net_arch.json", path, 1, args.show_outputs)
+            run_eval(path+"net_arch.json", path, 1, args.show_outputs)
     else:
         # run_eval(args.resume_model_json, args.resume_model, 1, True)
-        run_eval("..\\..\\trained_models_toshiba\\nyu\\net_arch.json", "..\\..\\trained_models_toshiba\\nyu\\weights_epoch0.h5", 1, args.show_outputs)
+        run_eval(path+"net_arch.json", path+"weights_epoch55.h5", 1, args.show_outputs)

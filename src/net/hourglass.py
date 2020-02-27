@@ -92,13 +92,14 @@ class HourglassNet(object):
         checkpoint = EvalCallBack(model_dir, self.inres, self.outres)
 
         lr_reducer = ReduceLROnPlateau(monitor='loss',
-                factor=0.8,
-                patience=3,
+                factor=0.5,
+                patience=5,
                 verbose=1,
                 cooldown=2,
-                mode='auto')
+                mode='min',
+                min_lr=5e-6)
 
-        xcallbacks = [csvlogger, checkpoint]
+        xcallbacks = [csvlogger, checkpoint, lr_reducer]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  initial_epoch=init_epoch, epochs=epochs, callbacks=xcallbacks)

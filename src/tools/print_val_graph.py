@@ -12,7 +12,7 @@ with open(val_path) as f:
         val_data05.append(float(line.split(':')[-1]))
 
 print('max acc {} in epoch {}'.format(np.max(val_data), np.argmax(val_data)))
-print('901 {}'.format(val_data05[901]))
+print('best {}'.format(val_data05[np.argmax(val_data05)]))
 plt.plot(val_data)
 plt.plot(val_data05)
 plt.xlabel('epoch')
