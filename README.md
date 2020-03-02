@@ -1,5 +1,6 @@
 # Stacked_Hourglass_Network_Keras
 
+Forked from [yuanyuanli85](https://github.com/yuanyuanli85/Stacked_Hourglass_Network_Keras)
 This is a Keras implementation for stacked hourglass network for single human pose estimation.  The stacked hourglass network was proposed by [Stacked Hourglass Networks for Human Pose Estimation] (https://arxiv.org/abs/1603.06937). The official implementation built on top of torch is released under [pose-hg-train](https://github.com/umich-vl/pose-hg-train), and pytorch version wrote by [berapaw](https://github.com/bearpaw) in repo [pytorch-pose](https://github.com/bearpaw/pytorch-pose). Most of code for image processing and evaluation come from above repos.
 
 ## Folder Structure
