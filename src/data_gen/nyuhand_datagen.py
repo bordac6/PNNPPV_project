@@ -30,7 +30,7 @@ class NYUHandDataGen(object):
         annot = annot_data['joint_uvd']
         nsamples = annot.shape[1]
         train_val_treshold = int(np.ceil(nsamples * 0.8))
-        hand_points = [12]#, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
         annot_idx = np.arange(nsamples)
 
         # val_anno, train_anno = [], []
@@ -46,18 +46,20 @@ class NYUHandDataGen(object):
             # train_annot_idx = annot_idx[:train_val_treshold]
             # shuffle(train_annot_idx)
             # return _anno, train_annot_idx[:32]
-            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
+            return _anno, np.array([34948])
+    #         , 41447,  6279, 15487, 16105, 12193,
+    #    39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+    #    25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+    #    32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
         elif self.is_train:
             return _anno, annot_idx[:train_val_treshold]
         else:
             # return _anno, annot_idx[train_val_treshold:]
-            return _anno, np.array([34948, 41447,  6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
+            return _anno, np.array([34948])
+    #         , 41447,  6279, 15487, 16105, 12193,
+    #    39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+    #    25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+    #    32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
 
     def get_dataset_size(self):
         return len(self.anno_idx)

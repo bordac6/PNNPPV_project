@@ -20,8 +20,8 @@ def create_hourglass_network(num_classes, num_stacks, num_channels, inres, outre
 
     model = Model(inputs=input, outputs=outputs)
     rms = RMSprop(lr=5e-4)
-    adam = Adam(lr=5e-1)
-    model.compile(optimizer=adam, loss=mean_squared_error, metrics=["accuracy"])
+    adam = Adam(lr=5e-2)
+    model.compile(optimizer=adam, loss=euclidean_loss, metrics=["accuracy"])
 
     return model
 
@@ -191,4 +191,5 @@ def create_heads(prelayerfeatures, rf1, num_classes, hgid, num_channels):
 
 
 def euclidean_loss(x, y):
-    return K.sqrt(K.sum(K.square(x - y)))
+    # print('gt.shape {} pred.shape {}'.format(x.shape, y.shape))
+    return K.sqrt(K.sum(K.square(x[:,:,:,0] - y[:,:,:,0])))

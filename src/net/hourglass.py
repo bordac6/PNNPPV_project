@@ -4,11 +4,12 @@ sys.path.insert(0, "../data_gen/")
 sys.path.insert(0, "../eval/")
 sys.path.insert(0, "../tools/")
 
+import matplotlib.pyplot as plt
 import os
 import config_reader
 from hg_blocks import create_hourglass_network, euclidean_loss, bottleneck_block, bottleneck_mobile
 from nyuhand_datagen import NYUHandDataGen
-from keras.callbacks import CSVLogger, ModelCheckpoint
+from keras.callbacks import CSVLogger, ModelCheckpoint, LambdaCallback
 from keras.models import load_model, model_from_json
 from keras.optimizers import Adam, RMSprop
 from keras.losses import mean_squared_error
@@ -21,6 +22,7 @@ import imageio
 import keras.backend as K
 from keras.callbacks import ReduceLROnPlateau
 from keras.callbacks import TensorBoard
+import keras
 
 class HourglassNet(object):
 
@@ -57,8 +59,8 @@ class HourglassNet(object):
             os.path.join(model_path, "csv_train_" + str(datetime.datetime.now().strftime('%H:%M')) + ".csv"))
         modelfile = os.path.join(model_path, 'weights_{epoch:02d}_{loss:.2f}.hdf5')
 
+        print_weights = LambdaCallback(on_epoch_end=lambda batch, logs: [ cv2.self.model.layers[i].get_weights() for i in range(len(self.model.layers)) ])
         checkpoint = EvalCallBack(model_path, self.inres, self.outres)
-
         lr_reducer = ReduceLROnPlateau(monitor='loss',
                 factor=0.5,
                 patience=5,
@@ -66,8 +68,9 @@ class HourglassNet(object):
                 cooldown=2,
                 mode='min',
                 min_lr=5e-6)
-
+        
         xcallbacks = [csvlogger, checkpoint, lr_reducer]
+        # xcallbacks = [csvlogger, checkpoint, lr_reducer, visualizeWeightsCallback()]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
@@ -128,3 +131,29 @@ class HourglassNet(object):
         imgdata = imageio.imread(imgfile)
         ret = self.inference_rgb(imgdata, imgdata.shape, mean)
         return ret
+
+import cv2
+class visualizeWeightsCallback(keras.callbacks.Callback):
+
+    def on_epoch_end(self, epoch, logs=None):
+        layer_names = []
+        for layer in self.model.layers:
+            layer_names.append(layer.name)
+        
+        for layer_name, layer_act in zip(layer_names, [self.model.layers[i].get_weights() for i in range(len(layer_names))]):
+
+            layer_activation = np.array(layer_act)
+            try:
+                if layer_activation.shape[0] == 0 or layer_activation.shape[1] == 0:
+                    continue
+            except:
+                continue
+
+            scale_percent = 1000 # percent of original size
+            width = int(layer_activation.shape[1] * scale_percent / 100)
+            height = int(layer_activation.shape[0] * scale_percent / 100)
+            dim = (width, height)
+            # resize image
+            resized = cv2.resize(layer_activation, dim, interpolation = cv2.INTER_AREA) 
+            cv2.imshow('WEIGHTS {}'.format(layer_name), resized)
+        cv2.waitKey(1000)
