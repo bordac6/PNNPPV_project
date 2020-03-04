@@ -61,16 +61,9 @@ class HourglassNet(object):
 
         print_weights = LambdaCallback(on_epoch_end=lambda batch, logs: [ cv2.self.model.layers[i].get_weights() for i in range(len(self.model.layers)) ])
         checkpoint = EvalCallBack(model_path, self.inres, self.outres)
-        lr_reducer = ReduceLROnPlateau(monitor='loss',
-                factor=0.5,
-                patience=5,
-                verbose=1,
-                cooldown=2,
-                mode='min',
-                min_lr=5e-6)
-        
+        lr_reducer = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=1, cooldown=2, mode='min', min_lr=5e-6)
+
         xcallbacks = [csvlogger, checkpoint, lr_reducer]
-        # xcallbacks = [csvlogger, checkpoint, lr_reducer, visualizeWeightsCallback()]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
@@ -80,8 +73,6 @@ class HourglassNet(object):
         self.load_model(model_json, model_weights)
         self.model.compile(optimizer=Adam(lr=5e-2), loss=self.euclidean_loss, metrics=["accuracy"])
 
-        # dataset_path = os.path.join('D:\\', 'nyu_croped')
-        # dataset_path = '/home/tomas_bordac/nyu_croped'
         dataset_path = config_reader.load_path('dataset_path_nyu')
         train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
@@ -94,16 +85,9 @@ class HourglassNet(object):
 
         print_weights = LambdaCallback(on_epoch_end=lambda batch, logs: [ cv2.self.model.layers[i].get_weights() for i in range(len(self.model.layers)) ])
         checkpoint = EvalCallBack(model_dir, self.inres, self.outres)
-        lr_reducer = ReduceLROnPlateau(monitor='loss',
-                factor=0.5,
-                patience=5,
-                verbose=1,
-                cooldown=2,
-                mode='min',
-                min_lr=5e-6)
+        lr_reducer = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=1, cooldown=2, mode='min', min_lr=5e-6)
         
         xcallbacks = [csvlogger, checkpoint, lr_reducer]
-        # xcallbacks = [csvlogger, checkpoint, lr_reducer, visualizeWeightsCallback()]
 
         self.model.fit_generator(generator=train_gen, steps_per_epoch=(train_dataset.get_dataset_size() // batch_size) * 4,
                                  epochs=epochs, callbacks=xcallbacks)
@@ -133,9 +117,11 @@ class HourglassNet(object):
         ret = self.inference_rgb(imgdata, imgdata.shape, mean)
         return ret
 
+    # used when training is resumed
     def euclidean_loss(self, x, y):
-        # print('gt.shape {} pred.shape {}'.format(x.shape, y.shape))
+        # return K.sqrt(K.sum(K.square(x[:,:,:,0] - y[:,:,:,0])))
         return K.sqrt(K.sum(K.square(x[:,:,:,0:9:2] - y[:,:,:,0:9:2])))
+        # return K.sqrt(K.sum(K.square(x - y)))
 
 import cv2
 class visualizeWeightsCallback(keras.callbacks.Callback):

@@ -4,5 +4,5 @@
     "home": "D:\\nyu_croped",
     "google_cloud": "/home/tomas_bordac/nyu_croped",
     "frq": "../../data/nyu_croped/",
-    "val_path": "../../trained_models/nyu_pretrained_3/val.txt"
+    "val_path": "../../src/top/val.txt"
 }

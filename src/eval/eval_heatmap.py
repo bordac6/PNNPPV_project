@@ -34,7 +34,7 @@ def cal_kp_distance(pre_kp, gt_kp, norm, threshold):
         return -1, 255
 
 
-def heatmap_accuracy(predhmap, meta, norm, threshold):
+def heatmap_accuracy(predhmap, meta, norm, threshold, joints_acc):
     pred_kps = post_process_heatmap(predhmap)
     pred_kps = np.array(pred_kps)
 
@@ -51,20 +51,22 @@ def heatmap_accuracy(predhmap, meta, norm, threshold):
             failed_pred_count += 1
         elif dis == 1:
             good_pred_count += 1
+            joints_acc[i] += 1
         elif dis == 2:
             almost_pred_count += 1
+            joints_acc[i] += 1
         if dif < 255:
             arr_dif.append(dif)
 
     return good_pred_count, failed_pred_count, almost_pred_count, arr_dif
 
 
-def cal_heatmap_acc(prehmap, metainfo, threshold):
+def cal_heatmap_acc(prehmap, metainfo, threshold, joints_acc):
     sum_good, sum_fail, sum_almost = 0, 0, 0
     arr_mean, arr_med = [], []
     for i in range(prehmap.shape[0]):
         _prehmap = prehmap[i, :, :, :]
-        good, bad, almost, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold) #norm fitted on gtmap NYUhand
+        good, bad, almost, arr_dif = heatmap_accuracy(_prehmap, metainfo[i], norm=4.5, threshold=threshold, joints_acc=joints_acc) #norm fitted on gtmap NYUhand
 
         sum_good += good
         sum_fail += bad
@@ -72,4 +74,4 @@ def cal_heatmap_acc(prehmap, metainfo, threshold):
         arr_mean.append(np.mean(arr_dif))
         arr_med.append(np.median(arr_dif))
 
-    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med)
+    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med), joints_acc
