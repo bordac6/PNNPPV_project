@@ -95,14 +95,14 @@ class EvalCallBack(keras.callbacks.Callback):
         print('Eval Accuray [0.5] ', acc_2, '@ Epoch ', epoch)
         print('mean distance {}; median distance {}'.format(np.mean(total_arr_mean), np.median(total_arr_med)))
         print('AVG max distance {}; min distance {}'.format(np.max(total_arr_mean), np.min(total_arr_mean)))
-        print('Acc for separate HM: '.format(joints_acc / valdata.get_dataset_size()))
+        print('Acc for separate HM: {}'.format(joints_acc / valdata.get_dataset_size()))
 
         with open(os.path.join('./', 'val.txt'), 'a+') as xfile:
             xfile.write('Epoch ' + str(epoch) + ':' + str(acc) + ':' + 
             str(np.mean(total_arr_mean)) + ':' + str(np.median(total_arr_med)) + ':' + 
             str(np.max(total_arr_mean)) + ':' + str(np.min(total_arr_mean)) + ':' + 
             str(np.max(total_arr_med)) + ':' + str(np.min(total_arr_med)) + ':' + 
-            str(acc_2) + '\n')
+            str(acc_2) + ':' + str(joints_acc / valdata.get_dataset_size()) + '\n')
 
     def on_epoch_end(self, epoch, logs=None):
         # This is a walkaround to sovle model.save() issue

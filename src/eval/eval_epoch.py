@@ -94,7 +94,7 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
     n_stacked = 2
 
     count = 0
-    batch_size = 1
+    batch_size = 32
     for _img, _gthmap, _meta in valdata.generator(batch_size, n_stacked, sigma=3, is_shuffle=False, with_meta=True):
 
         count += batch_size
@@ -104,7 +104,8 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
         out = model.predict(_img)
 
         if count+batch_size > valdata.get_dataset_size():
-            for i in range(1):
+            for index in range(1):
+                i = np.random.randint(batch_size)
                 kp = _meta[i]['tpts']
                 scale = _meta[i]['scale']
                 orig_image = cv2.resize(_img[i], dsize=(orig_size, orig_size), interpolation=cv2.INTER_CUBIC)
@@ -125,17 +126,17 @@ def run_eval(model_json, model_weights, epoch, show_outputs=False, acc_history=[
 
                 all_images = np.hstack(imgs)
 
-                cv2.imshow('Original htmaps {}'.format(i), np.array(_gthmap)[-1][0][:,:,i])
-                cv2.imshow('Predicted htamps {}'.format(i), all_images)
-                cv2.imshow('Image with predicted joints {}'.format(i), orig_image)
+                # cv2.imshow('Original htmaps {}'.format(i), np.array(_gthmap)[-1][0][:,:,i])
+                # cv2.imshow('Predicted htamps {}'.format(i), all_images)
+                cv2.imshow('Image with predicted joints {}'.format(epoch), orig_image)
                 
-        for k in range(n_stacked):
-            layers = tuple()
-            for i in range(out[-1].shape[-1]):
-                layers += (out[k][0,:,:,i],)
-            cv2.imshow('Predicted heatmap output[{}] HG'.format(k), np.hstack(layers))
+        # for k in range(n_stacked):
+        #     layers = tuple()
+        #     for i in range(out[-1].shape[-1]):
+        #         layers += (out[k][0,:,:,i],)
+        #     cv2.imshow('Predicted heatmap output[{}] HG'.format(k), np.hstack(layers))
         
-        cv2.waitKey(0)
+        cv2.waitKey(100)
         
         suc, bad, between_thresholds, mean, med, dists = cal_heatmap_acc(out[-1], _meta, threshold)
 
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume_model", help="start point to retrain")
     parser.add_argument("--resume_model_json", help="model json")
 
-    path = '..\\..\\trained_models\\nyu_pretrained_3\\'
+    path = '..\\..\\trained_models\\nyu_32im_11hm_256ch_fingertips\\'
     args = parser.parse_args()
     if args.all:
         weights_paths = glob.glob(path+"*.h5")
@@ -179,4 +180,5 @@ if __name__ == "__main__":
             run_eval(path+"net_arch.json", path, 1, args.show_outputs)
     else:
         # run_eval(args.resume_model_json, args.resume_model, 1, True)
-        run_eval(path+"net_arch.json", path+"weights_epoch55.h5", 1, args.show_outputs)
+        for i in range(0,60,3):
+            run_eval(path+"net_arch.json", path+"weights_epoch{}.h5".format(118+i), i, args.show_outputs)

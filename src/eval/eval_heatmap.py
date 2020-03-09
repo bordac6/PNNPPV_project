@@ -74,4 +74,4 @@ def cal_heatmap_acc(prehmap, metainfo, threshold, joints_acc):
         arr_mean.append(np.mean(arr_dif))
         arr_med.append(np.median(arr_dif))
 
-    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med), joints_acc
+    return sum_good, sum_fail, sum_almost, np.mean(arr_mean), np.median(arr_med)
