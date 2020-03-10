@@ -52,7 +52,7 @@ class HourglassNet(object):
         # dataset_path = '/home/tomas_bordac/nyu_croped'
         # dataset_path = '../../data/nyu_croped/'
         dataset_path = config_reader.load_path('dataset_path_nyu')
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=False)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         csvlogger = CSVLogger(
@@ -74,7 +74,7 @@ class HourglassNet(object):
         self.model.compile(optimizer=Adam(lr=5e-2), loss=self.euclidean_loss, metrics=["accuracy"])
 
         dataset_path = config_reader.load_path('dataset_path_nyu')
-        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=True)
+        train_dataset = NYUHandDataGen('joint_data.mat', dataset_path, inres=self.inres, outres=self.outres, is_train=True, is_testtrain=False)
         train_gen = train_dataset.generator(batch_size, self.num_stacks, sigma=3, is_shuffle=True)
 
         model_dir = os.path.dirname(os.path.abspath(model_json))

@@ -33,31 +33,25 @@ class NYUHandDataGen(object):
         hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
         annot_idx = np.arange(nsamples)
 
-        # val_anno, train_anno = [], []
-        _anno = []
+        val_anno, train_anno = [], []
         for i in range(nsamples):
-            _anno.append(annot[0, i, hand_points, :])
-            # if  i < train_val_treshold:
-                # train_anno.append(annot[0, i, hand_points, :])
-            # else:
-            #     val_anno.append(annot[0, i, hand_points, :])
+            if  i < train_val_treshold:
+                train_anno.append(annot[0, i, hand_points, :])
+            else:
+                val_anno.append(annot[0, i, hand_points, :])
 
         if self.is_train and self.is_testtrain:
-            # train_annot_idx = annot_idx[:train_val_treshold]
-            # shuffle(train_annot_idx)
-            # return _anno, train_annot_idx[:32]
-            return _anno, np.array([34948, 41447, 6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
+            train_annot_idx = annot_idx[:train_val_treshold]
+            shuffle(train_annot_idx)
+            return train_anno, train_annot_idx[:32]
         elif self.is_train:
-            return _anno, annot_idx[:train_val_treshold]
+            return train_anno, annot_idx[:train_val_treshold]
         else:
-            # return _anno, annot_idx[train_val_treshold:]
-            return _anno, np.array([34948, 41447, 6279, 15487, 16105, 12193,
-       39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
-       25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
-       32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
+            return val_anno, annot_idx[train_val_treshold:]
+    #         return _anno, np.array([34948, 41447, 6279, 15487, 16105, 12193,
+    #    39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
+    #    25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
+    #    32204, 35710, 41101, 27014, 15693, 34949, 34950, 34951])
 
     def get_dataset_size(self):
         return len(self.anno_idx)
