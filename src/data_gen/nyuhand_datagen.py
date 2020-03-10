@@ -34,20 +34,22 @@ class NYUHandDataGen(object):
         annot_idx = np.arange(nsamples)
 
         val_anno, train_anno = [], []
+        _anno = []
         for i in range(nsamples):
-            if  i < train_val_treshold:
-                train_anno.append(annot[0, i, hand_points, :])
-            else:
-                val_anno.append(annot[0, i, hand_points, :])
+            _anno.append(annot[0, i, hand_points, :])
+            # if  i < train_val_treshold:
+            #     train_anno.append(annot[0, i, hand_points, :])
+            # else:
+            #     val_anno.append(annot[0, i, hand_points, :])
 
         if self.is_train and self.is_testtrain:
             train_annot_idx = annot_idx[:train_val_treshold]
             shuffle(train_annot_idx)
-            return train_anno, train_annot_idx[:32]
+            return _anno, train_annot_idx[:32]
         elif self.is_train:
-            return train_anno, annot_idx[:train_val_treshold]
+            return _anno, annot_idx[:train_val_treshold]
         else:
-            return val_anno, annot_idx[train_val_treshold:]
+            return _anno, annot_idx[train_val_treshold:]
     #         return _anno, np.array([34948, 41447, 6279, 15487, 16105, 12193,
     #    39944, 16401, 50508, 16298, 52362, 55999, 38257, 44611,  2843,
     #    25869, 39627, 47312, 38578, 15636, 53584, 12798, 20677, 15582,
