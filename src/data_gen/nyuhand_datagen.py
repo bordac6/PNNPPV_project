@@ -12,8 +12,11 @@ import imageio
 class NYUHandDataGen(object):
 
     def __init__(self, matfile, imgpath, inres, outres, is_train, is_testtrain):
+        self.my = False
         self.matfile = matfile
         self.imgpath = imgpath
+        if self.my:
+            self.imgpath = 'C:\\Users\\TBordac\\Documents\\Workspace\\git\\annotator\\train\\'
         self.inres = inres
         self.outres = outres
         self.is_train = is_train
@@ -31,6 +34,8 @@ class NYUHandDataGen(object):
         nsamples = annot.shape[1]
         train_val_treshold = int(np.ceil(nsamples * 0.8))
         hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        if self.my:
+            hand_points = [0,1,2,3,4,5,6,7,8,9,10]
         annot_idx = np.arange(nsamples)
 
         val_anno, train_anno = [], []
@@ -107,11 +112,16 @@ class NYUHandDataGen(object):
     def process_image(self, sample_index, kpanno, sigma):
         imagefile = 'rgb_1_'+ str(sample_index+1).zfill(7) +'.jpg'
         image = imageio.imread(os.path.join(self.imgpath, imagefile))
+        image = cv2.resize(image, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
     
         norm_image = data_process.normalize(image, self.get_color_mean())
+        if self.my:
+            norm_image = image / 255.0
 
         # create heatmaps
         heatmaps, orig_size_map = data_process.generate_gtmap(kpanno, sigma, self.outres)
+        if self.my:
+            heatmaps, orig_size_map = data_process.generate_gtmap_my(kpanno, sigma, self.outres)
         # print('heatmaps zero sum: ', np.sum(heatmaps==0))
         # print('heatmaps gtzero sum: ', np.sum(heatmaps>0))
         # print('heatmaps ltzero sum: ', np.sum(heatmaps<0))
@@ -147,37 +157,3 @@ class NYUHandDataGen(object):
                 'wrist'
                 ]
         return keys
-
-    def flip(self, image, joints, center):
-
-        import cv2
-
-        joints = np.copy(joints)
-
-        matchedParts = (
-            [0, 5],  # ankle
-            [1, 4],  # knee
-            [2, 3],  # hip
-            [10, 15],  # wrist
-            [11, 14],  # elbow
-            [12, 13]  # shoulder
-        )
-
-        org_height, org_width, channels = image.shape
-
-        # flip image
-        flipimage = cv2.flip(image, flipCode=1)
-
-        # flip each joints
-        joints[:, 0] = org_width - joints[:, 0]
-
-        for i, j in matchedParts:
-            temp = np.copy(joints[i, :])
-            joints[i, :] = joints[j, :]
-            joints[j, :] = temp
-
-        # center
-        flip_center = center
-        flip_center[0] = org_width - center[0]
-
-        return flipimage, joints, flip_center

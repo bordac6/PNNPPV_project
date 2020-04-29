@@ -160,6 +160,20 @@ def generate_gtmap(joints, sigma, outres):
     # return gtmap
     return gtmap, hmap[:,:480,:]
 
+def generate_gtmap_my(joints, sigma, outres):
+    npart = joints.shape[0]
+    hmap = np.zeros(shape=(256, 256, npart), dtype=float)
+    gtmap = np.zeros(shape=(outres[0], outres[1], npart), dtype=float)
+
+    for i in range(npart):
+        visibility = joints[i, 2]
+        if visibility > 0:
+            hmap[:, :, i] = draw_labelmap(hmap[:, :, i], joints[i, :], 15)
+            gtmap[:, :, i] = cv2.resize(hmap[:,:, i], dsize=(outres[1], outres[0]), interpolation=cv2.INTER_CUBIC)
+    
+    # return gtmap
+    return gtmap, hmap[:,:480,:]
+
 def generate_gtmap_rhd(joints, sigma, outres):
     npart = joints.shape[0]
     hmap = np.zeros(shape=(320, 320, npart), dtype=float)
