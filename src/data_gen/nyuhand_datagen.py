@@ -12,7 +12,7 @@ import imageio
 class NYUHandDataGen(object):
 
     def __init__(self, matfile, imgpath, inres, outres, is_train, is_testtrain):
-        self.my = False
+        self.my = True
         self.matfile = matfile
         self.imgpath = imgpath
         if self.my:
@@ -34,9 +34,10 @@ class NYUHandDataGen(object):
         nsamples = annot.shape[1]
         train_val_treshold = int(np.ceil(nsamples * 0.8))
         hand_points = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 35]
+        annot_idx = np.arange(nsamples)
         if self.my:
             hand_points = [0,1,2,3,4,5,6,7,8,9,10]
-        annot_idx = np.arange(nsamples)
+            np.random.shuffle(annot_idx)
 
         val_anno, train_anno = [], []
         _anno = []
@@ -68,6 +69,8 @@ class NYUHandDataGen(object):
 
     def get_color_mean(self):
         mean = np.array([0.285, 0.292, 0.304])
+        if self.my:
+            mean = np.array([0.4486, 0.4269, 0.3987])
         return mean
 
     def get_annotations(self):

@@ -4,6 +4,7 @@ sys.path.insert(0, "../data_gen/")
 sys.path.insert(0, "../eval/")
 sys.path.insert(0, "../tools/")
 
+from keras.utils import plot_model
 import matplotlib.pyplot as plt
 import os
 import config_reader
@@ -43,9 +44,6 @@ class HourglassNet(object):
         # show model summary and layer name
         if show:
             self.model.summary()
-
-    def euclidean_loss(self, x, y):
-        return K.sqrt(K.sum(K.square(x - y)))
 
     def train(self, batch_size, model_path, epochs):
         # dataset_path = os.path.join('D:\\', 'nyu_croped')
@@ -103,7 +101,9 @@ class HourglassNet(object):
         imgdata = scipy.misc.imresize(rgbdata, self.inres)
 
         if mean is None:
-            mean = np.array([0.285, 0.292, 0.304])
+            #nyu 
+            # mean = np.array([0.285, 0.292, 0.304])
+            mean = np.array([0.4486, 0.4269, 0.3987])
 
         imgdata = normalize(imgdata, mean)
 
